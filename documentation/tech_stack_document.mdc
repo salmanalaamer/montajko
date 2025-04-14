@@ -1,0 +1,117 @@
+---
+description: Apply these rules when making changes to the project
+globs:
+alwaysApply: true
+---
+
+Update this rule if user requested changes to the project requirement, etc.
+# Tech Stack Document
+
+This document explains the technology choices behind our smart dashboard project in a simple, everyday language. It describes the tools and methods we use to build the frontend (what users see), the backend (the logic and data handling behind the scenes), how we deploy our application, and the steps we take to ensure both security and performance. Below is a breakdown of our tech stack and the reasoning behind each choice.
+
+## Frontend Technologies
+
+Our frontend is what users interact with directly – it’s designed to be clean, modern, and intuitive. Here’s what we use:
+
+*   **Tailwind CSS:**
+
+    *   Provides a system of utility classes to build responsive and stylish user interfaces quickly. It helps keep our design simple, modern, and consistent with our branding guidelines.
+
+*   **Modern JavaScript Framework (e.g., React or Next.js):**
+
+    *   Powers the interactive components of the dashboard. This choice helps us build a flexible and fast interface where the data and views can update dynamically without needing full page reloads.
+
+*   **IBM Plex Arabic Font:**
+
+    *   Ensures consistent typography for both Arabic and English content. This font is chosen for its excellent readability and the harmonious look it gives to bilingual user interfaces.
+
+These technologies make sure that the visual elements load quickly, respond well to different screen sizes, and maintain the professional, minimal aesthetic required by creative agencies.
+
+## Backend Technologies
+
+The backend is the engine of our dashboard. It manages data, processes business logic, and connects the user interface with our database and file storage system.
+
+*   **Supabase Database:**
+
+    *   Acts as our main data repository, storing everything from client details to task statuses. Supabase provides an easy-to-use, secure, and scalable database solution.
+
+*   **Supabase Storage:**
+
+    *   Handles internal file management. All design files, contracts, and other project-related documents are stored here, ensuring organized and secure file storage.
+
+*   **AES-256 Encryption:**
+
+    *   Applies a strong encryption protocol to protect sensitive data (like social media credentials). This ensures that even if someone gains unauthorized access, the data remains secure.
+
+*   **HTTPS/SSL/TLS:**
+
+    *   Protects all data in transit between the client and server. With encrypted connections, our users can trust that their information is safe during every interaction.
+
+*   **Role-Based Access Control (RBAC):**
+
+    *   Dictates which users can access certain parts of the system. For example, designers only see their tasks while project managers have a wider scope. This ensures that sensitive data is only accessible by those with proper permissions.
+
+These backend components work synergistically to power the application’s functionality, ensuring robust data management and solid performance.
+
+## Infrastructure and Deployment
+
+Beyond coding, our system’s reliability and scalability are supported by well-chosen infrastructural components:
+
+*   **Hosting and Deployment Platforms:**
+
+    *   We are leveraging platforms (such as Supabase for backend components along with modern deployment services like Vercel or similar) that ensure our application is available, fast, and capable of growing over time.
+
+*   **CI/CD Pipelines (Continuous Integration and Continuous Deployment):**
+
+    *   Automated pipelines help us deploy updates efficiently and safely. This means new features and fixes can be rolled out without downtime.
+
+*   **Version Control (Git):**
+
+    *   Git keeps track of every change made to the codebase. This ensures that we can work collaboratively and roll back if anything unexpected happens.
+
+These infrastructure choices make sure our project remains reliable and easy to maintain, while also being capable of handling increased demand as our user base grows.
+
+## Third-Party Integrations
+
+While our system is built as a self-contained, streamlined dashboard, we also use external tools to help us with development and ongoing improvements:
+
+*   **Cursor:**
+
+    *   An advanced IDE that leverages AI-powered coding suggestions. It assists our developers with real-time feedback and coding assistance, ultimately speeding up our development process.
+
+*   **GPT-4o:**
+
+    *   Used for code generation and debugging assistance. This AI-powered tool helps in enhancing our coding productivity and ensuring that our logic is sound and efficient.
+
+These integrations primarily enhance our development workflow, ensuring that our coding practices remain effective and efficient.
+
+## Security and Performance Considerations
+
+Ensuring that the application is both secure and fast is a top priority. We implement several measures to achieve this:
+
+*   **Security Measures:**
+
+    *   **Data Encryption at Rest and in Transit:** With AES-256 and HTTPS, all sensitive information, including social media credentials, are well-protected.
+    *   **Role-Based Access Control (RBAC):** Limits data access to authorized personnel only.
+    *   **Environment-Level Secrets Management:** All encryption keys and sensitive configurations are stored in secure environment variables.
+    *   **Optional Two-Factor Authentication (2FA):** Adds another layer of security for users who access highly sensitive data.
+
+*   **Performance Optimizations:**
+
+    *   **Responsive Design with Tailwind CSS:** Ensures fast loading times and responsive layouts across different devices.
+    *   **Optimized Queries and Indexing:** Within the Supabase database, we ensure that our queries are efficient to maintain fast data retrieval even as data grows.
+    *   **Efficient CI/CD Processes:** Allow prompt updates and patches to improve performance without sacrificing stability.
+
+These measures ensure that user data is kept secure while the system remains responsive and efficient.
+
+## Conclusion and Overall Tech Stack Summary
+
+To sum up, our technology choices are carefully selected to align with the goals of creating a secure, efficient, and user-friendly creative project management dashboard. Here’s a quick recap:
+
+*   **Frontend:** Uses Tailwind CSS, a modern JavaScript framework (React/Next.js), and IBM Plex Arabic to deliver a clean, responsive, and consistent user interface.
+*   **Backend:** Powered by Supabase for both database and storage, featuring AES-256 encryption, HTTPS, and comprehensive role-based access control to ensure data security and reliability.
+*   **Infrastructure:** Relies on modern hosting platforms, automated CI/CD pipelines, and Git version control to ensure smooth and scalable deployment.
+*   **Third-Party Integrations:** Enhanced by tools like Cursor and GPT-4o, which boost our development efficiency.
+*   **Security & Performance:** Prioritizes high-level encryption, secure data transmission, and performance optimizations, all of which are essential to meet the needs of creative agencies handling sensitive information.
+
+These carefully chosen technologies, working in harmony, set our project apart by ensuring that it is not only secure and reliable but also adaptable for future growth and expansion. This tech stack directly supports the dashboard’s purpose of managing creative projects seamlessly, providing a robust backbone for everyday operations and future enhancements.

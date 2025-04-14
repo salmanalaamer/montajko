@@ -1,0 +1,165 @@
+---
+description: Apply these rules when making changes to the project
+globs:
+alwaysApply: true
+---
+
+Update this rule if user requested changes to the project requirement, etc.
+# Smart Dashboard Backend Structure Document
+
+This document describes the backend setup for the Smart Dashboard project. The aim is to offer a centralized system to manage creative projects, tasks, asset files, and team collaboration, specifically for creative agencies and professionals. The following sections provide an accessible explanation of the architecture, data management, API design, hosting, security, and maintenance strategies.
+
+## Backend Architecture
+
+- The backend is based on a modular and clean design that separates core functionalities such as user management, project/task handling, file storage, and notifications.
+- It uses Node.js with the Express framework to build APIs which serve as the communication bridge between the frontend and the backend services.
+- Supabase is used both for database management (with a SQL-based Postgres engine) and file storage, ensuring that files (designs, briefs, contracts) are managed centrally.
+- A combination of RESTful and GraphQL API designs allows for flexible data fetching. This setup helps provide scalability (growing with user demands), maintainability (modular components that can be updated independently), and high performance.
+
+## Database Management
+
+- The project uses Supabase as the database solution, which is built on PostgreSQL (a type of SQL database). This provides a powerful and reliable way to store structured data.
+- Data is organized into different tables (for clients, projects, tasks, users, comments, and encrypted social media credentials) with relationships that reflect how creative projects work.
+- Supabase Storage is used to handle the file management aspect, providing central storage and easy access to project-related documents and designs.
+- Data management practices include indexing and schema design that promotes data integrity and efficient access.
+
+## Database Schema
+
+### Human Readable Overview
+
+- **Clients**: Stores client information like names, contact details, and associated projects.
+- **Projects**: Contains project details, linked to a client, including subscription type (monthly/one-time), start/end dates, and status info.
+- **Tasks**: Details each task created under a project, including type (new design or edit), status, due dates, number of designs, file links, and revision histories.
+- **Users**: Holds data on individuals such as creative agency owners, project managers, designers, and social media specialists, along with their assigned roles.
+- **Comments**: Provides a log of task-specific comment threads and project activity for collaboration.
+- **Social Credentials**: Secure table for storing encrypted social media platform credentials (Instagram, TikTok, X, Google Maps) using AES-256 encryption.
+- **Files**: Records details on file uploads associated with both tasks and projects.
+
+### Example SQL Schema (for PostgreSQL/Supabase)
+
+-- Clients Table
+CREATE TABLE clients (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    contact_info TEXT,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Projects Table
+CREATE TABLE projects (
+    id SERIAL PRIMARY KEY,
+    client_id INTEGER REFERENCES clients(id),
+    title VARCHAR(255) NOT NULL,
+    subscription_type VARCHAR(50), -- 'design-only' or 'design + social'
+    start_date DATE,
+    end_date DATE,
+    status VARCHAR(50),
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Tasks Table
+CREATE TABLE tasks (
+    id SERIAL PRIMARY KEY,
+    project_id INTEGER REFERENCES projects(id),
+    assigned_user INTEGER REFERENCES users(id),
+    task_type VARCHAR(50), -- 'new design' or 'edit'
+    status VARCHAR(50),
+    due_date DATE,
+    number_of_designs INTEGER,
+    previous_task_id INTEGER,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Users Table
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    role VARCHAR(50), -- e.g., Owner, Project Manager, Design Manager, Designer, Social Media Specialist
+    password_hash TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Comments Table
+CREATE TABLE comments (
+    id SERIAL PRIMARY KEY,
+    task_id INTEGER REFERENCES tasks(id),
+    user_id INTEGER REFERENCES users(id),
+    comment TEXT,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Social Credentials Table
+CREATE TABLE social_credentials (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    platform VARCHAR(50),
+    encrypted_credential TEXT, -- encrypted via AES-256
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Files Table
+CREATE TABLE files (
+    id SERIAL PRIMARY KEY,
+    project_id INTEGER REFERENCES projects(id),
+    task_id INTEGER REFERENCES tasks(id),
+    file_url TEXT,
+    uploaded_at TIMESTAMP DEFAULT NOW()
+);
+
+## API Design and Endpoints
+
+- The backend provides a set of APIs that follow RESTful principles and/or GraphQL for more flexible queries.
+- Key endpoints and their functions include:
+  - **Client Endpoints**: Manage client creation, update, and deletion (e.g., GET/POST/PUT/DELETE at /api/clients).
+  - **Project Endpoints**: Handle project details, subscriptions, and analytics (e.g., /api/projects).
+  - **Task Endpoints**: Create tasks, update statuses, and manage assignments (e.g., /api/tasks).
+  - **User Endpoints**: Facilitate secure user registration (admin initiated) and role-based access control. These use endpoints such as /api/users.
+  - **File Endpoints**: Manage file uploads and retrieval from Supabase Storage (e.g., /api/files).
+  - **Social Credentials Endpoints**: Securely store and retrieve encrypted social media login details (e.g., /api/credentials).
+  - **Notification Endpoints**: Trigger and manage in-app and email notifications for tasks and deadlines.
+
+## Hosting Solutions
+
+- The backend services, including the Node.js/Express API and Supabase database, are hosted on cloud platforms ensuring high reliability.
+- Primary hosting recommendations include:
+  - **Supabase Hosting**: For database and file storage, offering built-in security, scalability, and ease of management.
+  - **Cloud Hosting for Node.js/Express**: Options like Vercel, Heroku, or similar cloud providers to host the API server.
+- Benefits include high uptime, scalability to accommodate growing data and user base, and cost-effectiveness with pay-as-you-go models.
+
+## Infrastructure Components
+
+- **Load Balancers**: Distribute incoming traffic evenly among servers to ensure smooth performance even during peak usage periods.
+- **Caching Mechanisms**: Use server-side caching to store frequently accessed data temporarily, reducing load times and increasing responsiveness.
+- **Content Delivery Network (CDN)**: Serve static assets (like images, JavaScript, CSS) quickly to users across different geographical locations.
+- **File Storage**: Supabase Storage serves as a central repository for all project files, ensuring secure and rapid access.
+- **Notification Services**: Infrastructure to handle both real-time in-app notifications and email alerts, ensuring users receive timely updates.
+
+## Security Measures
+
+- **Data Encryption:**
+  - AES-256 encryption for sensitive stored data, particularly social media credentials.
+  - HTTPS (SSL/TLS) ensures secure data transfer over the network.
+- **Authentication and Authorization:**
+  - Role-Based Access Control (RBAC) restricts access based on user roles (Owner, Project Manager, etc.).
+  - Admin-only registration ensures controlled user onboarding along with the possibility of optional two-factor authentication (2FA) for extra security.
+- **Secret Management:**
+  - Critical environment variables (like encryption keys) are stored securely at the environment level, ensuring they are not exposed.
+
+## Monitoring and Maintenance
+
+- **Monitoring Tools:**
+  - Integration with logging services and monitoring tools (for instance, built-in Supabase logs and possibly third-party services like Sentry) to track performance and errors.
+  - Real-time alerts to address any downtime or performance issues promptly.
+- **Maintenance Strategies:**
+  - Regular updates and patches to keep the backend secure and efficient.
+  - Scheduled backups and data integrity checks.
+  - Continuous integration/continuous deployment (CI/CD) pipelines for smooth and frequent updates.
+
+## Conclusion and Overall Backend Summary
+
+- The Smart Dashboard backend uses a modern and modular design to effectively manage creative projects, tasks, and collaborative workflows.
+- By leveraging Supabase for both the database (PostgreSQL) and file storage, alongside Node.js/Express for API services, the backend is scalable, maintainable, and secure.
+- Key differentiators include the emphasis on high-level security (AES-256 encryption, HTTPS, RBAC, and optional 2FA), centralized file management, and a flexible API design, all tailored to support the diverse needs of creative agency teams.
+- This comprehensive setup not only aligns with the project’s goals but also offers a roadmap for future scalability and integration possibilities.
+
+This document provides a clear understanding of how the backend architecture, hosting solutions, and infrastructure components come together to create a reliable and efficient system for the Smart Dashboard project.
