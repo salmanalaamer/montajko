@@ -1,0 +1,32 @@
+---
+description: Apply these rules when making changes to the project
+globs:
+alwaysApply: true
+---
+
+Update this rule if user requested changes to the project requirement, etc.
+# App Flow Document
+
+## Onboarding and Sign-In/Sign-Up
+
+The journey begins when an admin or owner invites a new team member to the platform. Instead of a public sign-up, the admin sends a personalized invitation email to the potential user. This email contains a secure link that directs the recipient to a page where they can set up their password. Once the password is set, the user uses the secure login screen to sign in. The initial login determines the user’s role, such as Designer, Project Manager, or Owner, which in turn dictates the features and information they can access. In cases where a user needs help with forgotten passwords, a simple recovery option is available to send a password reset link to their registered email. If a user decides to sign out from any session, the logout option clearly ends the session in a secure manner.
+
+## Main Dashboard or Home Page
+
+After the secure login, every user is taken to a clean and minimal dashboard designed in a modern, Apple-style interface. The home page welcomes the user with an overview of all active projects, tasks, and pertinent statistics like counts of projects, assignments, and deadlines. The dashboard is divided into clearly marked sections such as Clients & Projects, Tasks, Files, Social Accounts, and Statistics. In addition to these primary elements, a sidebar and navigation menu provide intuitive access to notifications and activity logs. From the main screen, users can quickly navigate to more detailed sections by clicking on project cards or specific task lists that redirect them to more in-depth views. The design ensures that moving from the overview to detailed content is seamless and straight-forward.
+
+## Detailed Feature Flows and Page Transitions
+
+Once inside the dashboard, users can manage every aspect of their creative projects and tasks. In the Clients & Projects section, the user can view a list of all clients with linked projects. When clicking on a project, they are taken to a detailed project page where they see information about the start and end dates, subscription type, and a countdown timer for subscription deadlines. This page also offers options to review related tasks and files. Within the Tasks area, project managers and designers work with individual tasks using a focused page. This page shows task details such as task type, status, due date, and file uploads. Designers see their assigned tasks while project managers have access to tasks across all projects, including options to edit or link tasks as revisions. In the Files section, users can upload and view files that are associated with the project or specific tasks. This page integrates with internal storage provided by Supabase, ensuring that all designs, briefs, and contracts are easily accessible in an organized manner. The Social Accounts page provides a secure place to view and handle social media platform credentials. Here, the interface enforces strong encryption and role-based restrictions, ensuring that only authorized users can see sensitive details. Each of these modules is interconnected. For example, a user can jump from a task page to the file upload section to attach additional design assets or move from a project page to the statistics view to understand progress over time.
+
+## Settings and Account Management
+
+Within the settings panel, users find a central location where they can manage their personal details and preferences. Here, users can update their profile information such as name, email, and password, as well as change notification settings like choosing between in-app alerts and email notifications. Users can manage filters and view options that tailor the dashboard display to their preferences, and these settings are saved for future sessions. In addition, if any billing or subscription information needs to be adjusted related to the internal tracking of client projects, these options are embedded within the system. Even though no online payments or external subscription transactions are processed, the settings area allows admins to supervise and update the subscription statuses of projects. Once adjustments are complete, users easily navigate back to the main dashboard with a clearly visible option to return to the overview, ensuring a logical flow between configuration and day-to-day use.
+
+## Error States and Alternate Paths
+
+The application anticipates issues such as invalid data entries, network connectivity interruptions, or attempts to access restricted sections. If a user provides incorrect login credentials or data in any form submission, clear error messages appear on the same page, providing guidance on what went wrong and how to correct it. In cases where connectivity is lost, the system displays a fallback page that notifies the user of technical difficulties while offering an option to retry. Should a user navigate to a page that they are not authorized to view, the application redirects them to a safe error or access denied page, ensuring that sensitive data remains protected. Every error page is designed to bring the user back into the normal workflow through clear instructions and links to the correct sections, making sure that any disruption is temporary and the user is quickly guided to resume their work.
+
+## Conclusion and Overall App Journey
+
+From start to finish, the journey on this platform is built around simplicity and security. An admin begins by inviting team members via email to set up a secure account, and once authenticated, each user is welcomed by a clear and highly functional dashboard. Users can easily navigate between projects, tasks, file management, social media credentials, and reporting analytics. The platform structures every transition—from detailed project views to task management pages—in a way that makes complete sense, ensuring that all creative projects and team collaborations are centrally managed with minimal friction. The process is designed to ensure that every user, regardless of role, is provided with the exact tools needed to check in on project progress, contribute effectively, and secure sensitive information, creating a harmonious and efficient workflow tailored for creative agencies.

@@ -1,0 +1,130 @@
+---
+description: Apply these rules when making changes to the project
+globs: 
+alwaysApply: true
+---
+
+Update this rule if user requested changes to the project requirement, etc.
+# Implementation plan
+
+## Phase 1: Environment Setup
+
+1. **Prevalidation Check:** Verify if the current directory is already an existing project by checking for key files (e.g., `package.json` or project config files). If found, skip project initialization. *(Reference: Project Summary & Tech Stack)*
+2. **Check Node.js Version:** Run `node -v` to verify Node.js v20.2.1 is installed. If not, install Node.js v20.2.1. *(Reference: Tech Stack: Core Tools)*
+3. **Check for Python Installation:** Run `python --version` to verify Python 3.11.4 is available (if needed for tooling). *(Reference: Tech Stack: Core Tools)*
+4. **Initialize Next.js Project:** Since the frontend uses Next.js, initialize a Next.js project using Next.js v14. Note that Next.js 14 is preferred for better AI tool compatibility. Create the project by running:
+   ```bash
+   npx create-next-app@14 my-dashboard
+   ```
+   *(Reference: Tech Stack: Frontend)*
+5. **Setup Project Directory Structure:** Navigate to the project root (`my-dashboard`) and ensure the following directories exist: `/pages`, `/components`, `/styles`, and `/backend` for custom API endpoints if needed. *(Reference: Project Summary & Design Preferences)*
+6. **Cursor Metrics Setup (for AI Tool Integration):**
+   - Create a file named `cursor_metrics.md` in the project root to track AI-assisted edits and metrics. Refer to `cursor_project_rules.mdc` for rules on updating this file. *(Reference: Tech Stack: AI Tools)*
+7. **Configure Cursor MCP for Supabase:**
+   - Create a directory named `.cursor` in the project root if it does not exist.
+   - Inside `.cursor`, create a file `mcp.json` if it does not exist.
+   - Populate `mcp.json` with the following configuration. **For macOS:**
+     ```json
+     {
+       "mcpServers": {
+         "supabase": {
+           "command": "npx",
+           "args": ["-y", "@modelcontextprotocol/server-postgres", "<connection-string>"]
+         }
+       }
+     }
+     ```
+     **For Windows:**
+     ```json
+     {
+       "mcpServers": {
+         "supabase": {
+           "command": "cmd",
+           "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-postgres", "<connection-string>"]
+         }
+       }
+     }
+     ```
+   - Display the following link so the user can obtain the connection string: [Supabase MCP Connection Guide](mdc:https:/supabase.com/docs/guides/getting-started/mcp#connect-to-supabase-using-mcp). Replace `<connection-string>` with your actual connection string after obtaining it. *(Reference: Tech Stack: AI Tools & Supabase)*
+8. **Validate Environment Setup:** Run `node -v`, `python --version`, and check that the required files (`cursor_metrics.md`, `.cursor/mcp.json`) have been created correctly.
+
+## Phase 2: Frontend Development
+
+9. **Integrate Tailwind CSS:** Install and configure Tailwind CSS. From the project root, run:
+   ```bash
+   npm install -D tailwindcss postcss autoprefixer
+   npx tailwindcss init -p
+   ```
+   Then, update `tailwind.config.js` and include Tailwind directives in your CSS file (e.g., `styles/globals.css`). *(Reference: Tech Stack: Frontend & Design Preferences)*
+10. **Set Up IBM Plex Arabic Font:** In the custom `_document.js` (located in `/pages/_document.js`), add the link to load IBM Plex Arabic. Example:
+    ```jsx
+    {/* In <Head> */}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600&display=swap" />
+    ```
+    *(Reference: Tech Stack: Frontend & Design Preferences)*
+11. **Implement Global Styling:** In `/styles/globals.css`, add CSS variables for the primary (`#EE5131`) and accent (`#00B7A5`) colors. Also, set base fonts (IBM Plex Arabic) and rounded corner defaults. *(Reference: Design Preferences)*
+12. **Create Main Dashboard Layout:** Create a component at `/components/DashboardLayout.js` that includes a tabbed view (Tabs: Tasks, Files, Social, Stats). This layout will be used in the main dashboard page. *(Reference: Key Features & Design Preferences)*
+13. **Develop Clients & Projects View:** Create a React component `/components/ClientsProjects.js` to manage and display client information, project types (monthly subscription or one-time), and subscription details. *(Reference: Key Features: Clients & Projects)*
+14. **Develop Tasks Management Component:** Create a component `/components/TasksManager.js` that includes functionalities to assign tasks, define task types (new design or edit), manage task statuses, due dates, and file uploads. Also, include linking tasks for revisions. *(Reference: Key Features: Tasks Management)*
+15. **Develop File Management Component:** Create a component `/components/FileManager.js` to handle file uploads and display centralized project file lists. This component will connect to Supabase Storage. *(Reference: Key Features: File Management)*
+16. **Develop Social Media Credentials Component:** Create a component `/components/SocialAccounts.js` to securely display and manage social media credentials. Ensure form fields for username, email, password, and platform name are created. *(Reference: Key Features: Social Media Accounts & Specific Requirements: Social Media Credentials Security)*
+17. **Integrate Notifications UI:** Develop a section in the dashboard (e.g., in `/components/Notifications.js`) to show in-app notifications for tasks and project updates. *(Reference: Key Features: Notifications)*
+18. **Responsive and Accessibility Adjustments:** Use Tailwind CSS utilities to make sure the dashboard is mobile responsive and supports RTL layouts for Arabic. *(Reference: Specific Requirements: Localization)*
+19. **Frontend Validation:** Run the frontend using `npm run dev` and verify the UI loads consistently, checking that fonts, colors, and layout adhere to design preferences. *(Reference: Non-Functional Requirements: Usability)*
+
+## Phase 3: Backend Development
+
+20. **Supabase Project Setup:** In your Supabase project dashboard, create a new project if not already existing. *(Reference: Tech Stack: Backend)*
+21. **Database Schema Creation:** Define and create the following tables with PostgreSQL using Supabase SQL Editor:
+    - Clients
+    - Projects (with fields: project type, subscription details, start/end dates)
+    - Tasks (including assigned user, task type, status, due date, design count, file uploads, revision links)
+    - Files (linked to Projects/Tasks)
+    - SocialAccounts (fields: username, email, password, platform name with AES-256 encryption policies)
+    - Users (with roles: Owner, Project Manager, Design Manager, Designer, Social Media Specialist)
+    - Comments (for task comments)
+    - ActivityFeeds (for project activity)
+    *(Reference: Key Features: Clients & Projects, Tasks, File Management, Social Media Accounts, and User Roles & Permissions)*
+22. **Implement RESTful API Endpoints:** Within the Next.js app, create API routes under `/pages/api/` to handle CRUD operations for:
+    - `/pages/api/clients.js` for client management
+    - `/pages/api/projects.js` for project management
+    - `/pages/api/tasks.js` for tasks operations
+    - `/pages/api/files.js` for file interactions
+    - `/pages/api/social.js` for social account management
+    *(Reference: Tech Stack: Backend)*
+23. **Incorporate Security and Encryption:** Implement middleware to enforce HTTPS, RBAC, and ensure that social media credentials are encrypted using AES-256 at rest. Utilize Supabase’s built-in security rules where applicable. *(Reference: Specific Requirements & Security)*
+24. **User Registration Constraints:** Implement logic in your user management API so that only admin users can send invitation emails to new users. Disable any self-signup endpoints. *(Reference: Specific Requirements: User Registration)*
+25. **Supabase Storage Configuration:** Configure Supabase Storage for handling file uploads. Create buckets and assign permissions as per project needs. *(Reference: Key Features: File Management)*
+26. **Backend Validation:** Test API endpoints using tools like Postman or cURL. For example, test the clients creation endpoint with:
+    ```bash
+    curl -X POST http://localhost:3000/api/clients -H 'Content-Type: application/json' -d '{"name": "Test Client"}'
+    ```
+    Ensure a proper 200 or 201 response. *(Reference: Non-Functional Requirements: Security & Performance)*
+
+## Phase 4: Integration
+
+27. **Connect Frontend to Backend APIs:** In the React components (e.g., `ClientsProjects.js`, `TasksManager.js`, etc.), use `fetch` or `axios` to consume the API endpoints created. *(Reference: App Flow & Key Features)*
+28. **Integrate Supabase for File Management:** Ensure that file upload components call Supabase Storage API and correctly handle file uploads and downloads. *(Reference: Key Features: File Management)*
+29. **Integrate Notification Systems:** Connect frontend notifications UI to backend notification endpoints. Implement periodic fetching or webhooks as necessary. *(Reference: Key Features: Notifications)*
+30. **Enforce Role-Based Access Control (RBAC):** On both frontend and backend, ensure that user roles (Owner, Project Manager, etc.) restrict access to functionalities (e.g., Designers see only their tasks). *(Reference: Key Features: User Roles & Permissions)*
+31. **Establish Collaboration Features:** Wire up the Comments and ActivityFeeds endpoints to respective frontend components, enabling task comments and project activity tracking. *(Reference: Key Features: Collaboration)*
+32. **Integration Validation:** Simulate a full user flow by creating a demo client, a project, tasks, and associated files. Validate that all components communicate with the backend correctly.
+
+## Phase 5: Deployment
+
+33. **Set Up Version Control:** Initialize a Git repository in the project root if not already done (`git init`). Commit the current project state. *(Reference: Non-Functional Requirements: Scalability)*
+34. **Configure Environment Variables:** In the project root, create a `.env.local` file and add necessary environment variables (e.g., Supabase connection URL, API keys, encryption secrets). *(Reference: Specific Requirements: Security)*
+35. **CI/CD Pipeline Setup:** Configure GitHub Actions (or a similar CI/CD tool) to run tests and deploy the Next.js application. Create a workflow file at `.github/workflows/ci-cd.yaml`. *(Reference: Non-Functional Requirements: Scalability)
+36. **Deploy to Vercel:** Since Next.js is optimized for Vercel, connect your repository to Vercel for automated deployments. Set the correct environment variables in Vercel’s dashboard. *(Reference: Tech Stack: Frontend & Deployment)*
+37. **Configure HTTPS:** Ensure that Vercel’s default HTTPS configuration is active and that all API endpoints are served over secure connections. *(Reference: Specific Requirements: Security)*
+38. **Post-Deployment Validation:** After deployment, run end-to-end tests using tools such as Cypress. Validate that the UI loads under 2 seconds, all APIs return expected responses, and secure functionalities (RBAC, encryption) operate correctly. *(Reference: Non-Functional Requirements: Performance & Security)*
+
+## Additional Tasks & Edge Cases
+
+39. **Implement Global Search & Filter:** Add a universal search bar in the dashboard that filters projects and tasks by various attributes such as status, type, or client name. *(Reference: Key Features: Search & Filters)*
+40. **Analytics & Reporting:** Develop components to display dashboard analytics, including project stats, task completions, and export options (Excel/PDF). *(Reference: Key Features: Dashboard & Analytics)*
+41. **Dark/Light Mode (Optional for Later):** Build an optional theme switcher that toggles between light and dark modes using Tailwind CSS’s dark mode features. *(Reference: Design Preferences)*
+42. **Localization Support:** Integrate a localization library (e.g., next-i18next) to support bilingual content (Arabic and English) including RTL support for Arabic. *(Reference: Specific Requirements: Localization)*
+43. **Final End-to-End Testing:** Run comprehensive tests across all functionalities. Use unit tests, integration tests, and manual testing to ensure compliance with all specified requirements. *(Reference: Q&A & Non-Functional Requirements: Usability)*
+
+This plan systematically covers environment setup, frontend and backend development, integration, and deployment while addressing security, scalability, and specific project requirements.
