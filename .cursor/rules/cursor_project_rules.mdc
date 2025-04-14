@@ -1,0 +1,125 @@
+---
+description: Apply these rules when making changes to the project
+globs:
+alwaysApply: true
+---
+
+Update this rule if user requested changes to the project requirement, etc.
+## Project Overview
+
+* **Type:** Creative Project Management Dashboard
+* **Description:** A centralized platform for managing creative projects, tasks, assets, and team collaboration designed for creative agencies, project managers, designers, and social media specialists.
+* **Primary Goal:** Deliver an efficient, secure, and intuitive solution to manage creative projects, streamline task assignments, file management, client communications, and real-time notifications.
+
+## Project Structure
+
+### Framework-Specific Routing
+
+* **Directory Rules:**
+
+    * **Next.js 14 (App Router):** Use the `app/` directory with nested route folders (e.g., `app/[route]/page.tsx`) to define routes and leverage server components.
+    * Example 1: "Next.js 14 (App Router)" → `app/[route]/page.tsx` conventions
+    * Example 2: "Next.js (Pages Router)" → `pages/[route].tsx` pattern *(Not applicable for this project)*
+    * Example 3: "React Router 6" → `src/routes/` with `createBrowserRouter` *(Not applicable for this project)*
+
+### Core Directories
+
+* **Versioned Structure:**
+
+    * **app:** Houses the primary application including API routes, layouts, and page components. 
+    * Example 1: `app/api` → "Next.js 14 API routes with Route Handlers for project, task, and user management"
+    * Example 2: `app/views` → Could be used for highly componentized views if needed *(Reserved for future integration for non-Next.js parts)*
+
+### Key Files
+
+* **Stack-Versioned Patterns:**
+
+    * **app/dashboard/layout.tsx:** Implements the root layout and navigation specific to the Smart Dashboard.
+    * **app/auth/login/page.tsx:** Contains the login page leveraging server actions and secure authentication flows.
+
+## Tech Stack Rules
+
+* **Version Enforcement:**
+
+    * **next@14:** Use the App Router exclusively; `getInitialProps` and traditional Pages Router usage are prohibited.
+    * **tailwindcss@latest:** Enforce building UI components with Tailwind CSS conventions ensuring mobile responsiveness, clean modern design, and scalability.
+    * **react@latest:** Adhere to React best practices including hooks and functional components.
+    * **supabase@latest:** Use Supabase for database operations and file storage, ensuring secure interactions and tight integration with backend services.
+    * **node@latest/express:** Build RESTful APIs following Express best practices.
+
+## PRD Compliance
+
+* **Non-Negotiable:**
+
+    * "Centralized platform for managing creative projects, tasks, assets, and team collaboration" must be implemented with strict role-based access controls, secure file management using Supabase Storage, and robust client & project management features.
+    * All security requirements such as AES-256 encryption, HTTPS enforcement, and environment-level secret management are mandatory.
+
+## App Flow Integration
+
+* **Stack-Aligned Flow:**
+
+    * Example: "Next.js 14 Auth Flow" → `app/auth/login/page.tsx` is used for secure user authentication and role-based access control.
+    * Tasks are routed to specific components in the dashboard, for example, task management pages located at `app/tasks/[taskId]/page.tsx`.
+    * File and project management features are integrated into the flow, ensuring that each project’s tasks, files, and notifications are easily accessible.
+
+## Best Practices
+
+* **Tailwind CSS**
+
+    * Utilize utility-first classes for rapid UI development and maintainability.
+    * Ensure responsiveness across devices using Tailwind’s responsive modifiers.
+    * Maintain a consistent theme with primary and accent colors (`#EE5131` and `#00B7A5`).
+
+* **React/Next.js**
+
+    * Leverage Next.js 14 App Router for cleaner routing and performance improvements.
+    * Use functional components and React hooks for state management and side effects.
+    * Implement server-side rendering and static site generation where relevant for improved SEO and performance.
+
+* **Supabase**
+
+    * Ensure secure storage practices with encryption at rest (AES-256) and enforce HTTPS in transit.
+    * Integrate Supabase Storage for file management, ensuring files are correctly associated with projects/tasks.
+    * Utilize Supabase’s real-time features for notifications and data updates where applicable.
+
+* **Node.js/Express**
+
+    * Use middleware for security, logging, and error handling.
+    * Structure the API endpoints following RESTful conventions for maintainability.
+    * Secure sensitive endpoints with robust authentication and authorization checks.
+
+* **GPT-4o**
+
+    * Utilize for code generation and debugging, ensuring consistency with coding standards.
+    * Validate AI-generated code with manual reviews to ensure security and performance.
+    * Document any AI-assisted code changes for transparency.
+
+* **Cursor (AI-Powered IDE)**
+
+    * Employ AI-powered code suggestions to improve development speed and reduce errors.
+    * Track usage metrics of cursor rules to monitor adherence to project standards.
+    * Ensure consistent code styling and linting through automated tools.
+
+## Rules
+
+* Derive folder/file patterns directly from version-specific implementation guidelines provided in the techStackDoc.
+* If using Next.js 14 App Router: Enforce the use of the `app/` directory with nested route folders; do not mix with Pages Router structure.
+* For REST APIs built in Node.js/Express, maintain a clear separation between API routes and frontend components.
+* Strictly apply role-based access control (RBAC) throughout the application to secure sensitive workflows and data.
+* Always enforce encryption standards (AES-256 for data at rest, HTTPS for in transit) and environment-level secrets management.
+
+## Rules Metrics
+
+Before starting project development, create a metrics file in the root of the project called `cursor_metrics.md` with the following format:
+
+# Rules Metrics
+
+## Usage
+
+The number of times each cursor rule is used as context:
+
+* rule-name.mdc: 0
+* another-rule.mdc: 0
+* ...other rules
+
+Remember to update `cursor_metrics.md` every time a cursor rule is utilized in the project context.

@@ -1,0 +1,200 @@
+---
+description: Apply these rules when making changes to the project
+globs:
+alwaysApply: true
+---
+
+Update this rule if user requested changes to the project requirement, etc.
+# Project Requirements Document
+
+## 1. Project Overview
+
+This project is a smart dashboard designed to centralize and manage all creative projects, tasks, assets, and team collaboration in one place. It brings together client and project management, task assignment, file storage, secure social media credential handling, and real-time notifications into a single, organized platform. By doing so, it helps creative agencies, project managers, designers, and social media specialists track design progress, social media details, deadlines, and file deliveries in one clean, minimal interface.
+
+The platform is being built to improve organization and transparency within creative teams, ensuring that only authorized members access sensitive data based on their roles. The key objectives are to facilitate seamless project tracking, support robust task and file management, enforce strict role-based access control, secure sensitive social data with high encryption standards, and provide an engaging yet straightforward user experience. Success will be measured by improved team efficiency, secured project data, and adherence to the specified design and security standards.
+
+## 2. In-Scope vs. Out-of-Scope
+
+**In-Scope:**
+
+*   User onboarding by admin invitation (secure user registration and role assignment).
+
+*   Client & Project Management:
+
+    *   Adding clients and linking projects.
+    *   Defining project type (monthly subscription or one-time service) with subscription countdowns.
+
+*   Task Management:
+
+    *   Creating, assigning, tracking tasks (new design or edit), including status, due dates, file uploads, and revision linking.
+
+*   File Management:
+
+    *   Uploading and organizing files (designs, briefs, contracts) via Supabase Storage.
+
+*   Social Media Account Management:
+
+    *   Storing social platform credentials with fields (username, email, password, platform name) securely.
+
+*   User Roles & Permissions:
+
+    *   Role-based access control for various roles (Owner, Project Manager, Design Manager, Designer, Social Media Specialist).
+
+*   Dashboard & Analytics:
+
+    *   Overview with statistics (total projects, tasks, completed designs), detailed project stats, filtering, searching, and report export (Excel/PDF).
+
+*   Search & Filters:
+
+    *   Filter options for projects and tasks; global search by project or client name.
+
+*   Real-Time Notifications:
+
+    *   In-app notifications for task assignments, deadlines, project status changes, and email alerts for critical events.
+
+*   Lightweight collaboration features:
+
+    *   Task-specific comment threads and activity feeds.
+
+*   Bilingual support with English and Arabic (including RTL for Arabic).
+
+*   Use of Tailwind-based design components with specific branding guidelines.
+
+**Out-of-Scope:**
+
+*   Self-signup for new users; registration is strictly by admin invitation.
+*   External integrations with file storage systems (Google Drive, Dropbox) – all file management will be handled internally.
+*   Real-time chat functionalities or a full messaging system.
+*   Public payment, invoicing, or online subscription transactions – subscription tracking is internal only.
+*   Full user dashboard layout customization beyond flexible filtering and sorting options.
+*   Integrations with external CRMs or marketing platforms (built with scalable architecture for future integrations but not implemented now).
+*   Support for additional languages beyond Arabic and English at this stage.
+
+## 3. User Flow
+
+A typical user journey starts when an admin or owner invites a new team member via email. The invitation includes a secure link for setting their password, ensuring that only authorized persons can complete registration. Once the user sets up their password and logs in for the first time, the system assigns permissions based on their role (Designer, Project Manager, etc.), restricting the viewable content to what is relevant for their responsibilities.
+
+After logging in, the user is greeted by a clean, minimal dashboard that features tabbed sections for Clients & Projects, Tasks, Files, Social Accounts, and Analytics. From here, they can navigate to add or manage projects, upload files, review task assignments, view upcoming deadlines, and monitor project status through both in-app notifications and an activity feed. The interface is intuitive with pre-set filters for projects and tasks, ensuring that a team member (whether a designer or project manager) immediately sees the information most pertinent to them.
+
+## 4. Core Features
+
+*   **User Onboarding and Access Control:**
+
+    *   Admin/Owner-only invitation process via email.
+    *   Secure link for password setup.
+    *   Role assignment determines accessible features (e.g., Designer vs. Project Manager).
+
+*   **Client & Project Management:**
+
+    *   Add and manage clients.
+    *   Link projects to clients with clear identification of project types (monthly subscription vs. one-time service).
+    *   Display start/end dates with a countdown for subscription projects.
+
+*   **Task Management:**
+
+    *   Create tasks with attributes such as task type (new design or edit), status, and due date.
+    *   Assign tasks to specific designers.
+    *   Support file uploads linked to tasks.
+    *   Link tasks to previous ones for revisions.
+
+*   **File Management:**
+
+    *   Upload and organize files per project or task.
+    *   Access all project-related files (designs, briefs, contracts) in one central location with Supabase Storage.
+
+*   **Social Media Account Management:**
+
+    *   Store sensitive social media credentials (username, email, password, platform).
+    *   Encrypt data at rest (using AES-256) and in transit (HTTPS).
+
+*   **Dashboard & Analytics:**
+
+    *   Overview and detailed stats of projects, tasks, and designs.
+    *   Filtering and sorting by project status, subscription type, assigned user, due dates.
+    *   Export reports to Excel or PDF.
+
+*   **Notifications:**
+
+    *   In-app notifications for task deadlines, assignments, and project updates.
+    *   Email alerts for critical updates (e.g., new task, nearing deadlines).
+
+*   **Collaboration & Activity Feed:**
+
+    *   Comment threads on each task.
+    *   Activity feed logging project events such as file uploads and task status changes.
+
+*   **Localization & Bilingual Support:**
+
+    *   Interface available in English and Arabic with support for RTL layouts.
+    *   Consistent use of IBM Plex Arabic font for both languages.
+
+## 5. Tech Stack & Tools
+
+*   **Frontend:**
+
+    *   Tailwind CSS for styling and responsive design.
+    *   Modern JavaScript/TypeScript framework (e.g., Next.js or React) for building the interactive UI.
+    *   Implementation of IBM Plex Arabic font for a consistent bilingual interface.
+
+*   **Backend:**
+
+    *   Supabase for database and file storage.
+    *   RESTful or GraphQL API (using Node.js/Express or similar) to manage business logic.
+    *   Implementation of AES-256 encryption for storing sensitive data.
+    *   HTTPS (SSL/TLS) for secure data transmission.
+
+*   **Authentication & Security:**
+
+    *   Role-based access control (RBAC) to enforce permission levels.
+    *   Optional Two-Factor Authentication (2FA) for sensitive roles.
+    *   Environment variables to manage encryption keys and sensitive data.
+
+*   **AI Models & Tools:**
+
+    *   GPT-4o for code generation, debugging assistance, and integration suggestions.
+    *   Cursor used as an advanced IDE for AI-powered coding with real-time suggestions.
+
+*   **Miscellaneous Tools:**
+
+    *   Supabase Storage for file management.
+    *   Standard analytics libraries to produce project/task statistics.
+
+## 6. Non-Functional Requirements
+
+*   **Performance:**
+
+    *   The dashboard and its components should load quickly (aim for load times under 2 seconds on modern desktop devices).
+    *   Notification system and file uploads must respond in near real-time.
+
+*   **Security:**
+
+    *   Strict use of HTTPS for all server-client communications.
+    *   Encryption at rest (AES-256) for sensitive credentials.
+    *   Environment-level secret management to protect encryption keys.
+    *   RBAC ensuring that users only see features and data relevant to their role.
+
+*   **Compliance & Usability:**
+
+    *   The design adheres to modern UX standards (minimal, clean, professional, Apple-style).
+    *   Mobile responsiveness (optimized primarily for desktop but functional on mobile).
+    *   Light/Dark mode support planned as an optional feature in later phases.
+
+## 7. Constraints & Assumptions
+
+*   The system assumes that user registration is controlled solely by admins, meaning no self-signup functionality is provided.
+*   All sensitive file and account data will be managed internally using Supabase technologies.
+*   The encryption (AES-256) and secure transmission (HTTPS) are expected to be available and properly configured.
+*   The project is built primarily for a bilingual (Arabic and English) target audience in the MENA region, assuming standard localized practices.
+*   It is assumed that initial feature implementations (like real-time notifications and filtering) will be sufficient before additional customization features might be added in future phases.
+*   Future integrations (e.g., CRM or marketing platforms) are not part of this scope but the architecture will be designed to allow for scalability.
+
+## 8. Known Issues & Potential Pitfalls
+
+*   There is a potential risk in managing and securing sensitive social media credentials. Without proper encryption and key management, there could be vulnerabilities. A strict review and testing of encryption, RBAC, and environment configurations are vital.
+*   Role-based access control must be meticulously implemented to prevent unauthorized access; misconfigurations might lead to exposure of sensitive project data.
+*   Dependencies on Supabase for both database and file storage may limit certain customizations. Monitor for any API changes or rate limits that might affect performance.
+*   The filtering and searching features can become complex as data volume grows. Ensure that indexing and optimized queries are used to maintain performance.
+*   Ensuring true bilingual support (including RTL for Arabic) might require careful UI/UX testing across different devices and browsers.
+*   The use of advanced IDE tools (Cursor) and AI model (GPT-4o) for development support assumes continuous availability and appropriate integration which might need fallback strategies if unavailable.
+
+This document provides a clear and thorough reference for subsequent technical documents, ensuring that every aspect of the creative project management dashboard is well-defined, secure, and scalable. Each element from user onboarding, project/task management, file storage, to notification systems is covered, leaving minimal room for ambiguity in future development stages.

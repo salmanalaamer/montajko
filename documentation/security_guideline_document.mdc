@@ -1,0 +1,132 @@
+---
+description: Apply these rules when making changes to the project
+globs:
+alwaysApply: true
+---
+
+Update this rule if user requested changes to the project requirement, etc.
+# Implementation Plan Summary
+
+This document provides a step-by-step guide for implementing a secure and scalable project management dashboard specialized for creative teams. It incorporates security best practices and a modern tech stack while supporting bilingual (Arabic & English) interfaces and internal file management.
+
+## 1. Project Overview
+
+- **Purpose:** Centralize creative projects, tasks, assets, and team collaboration in one dashboard.
+- **Target Audience:** Creative agency owners, project managers, graphic designers, and social media specialists.
+- **Core Features:**
+  - Client & Project Management
+  - Task Management with file uploads and revision tracking
+  - File Management through Supabase Storage
+  - Social Media Account Management with encrypted storage of credentials
+  - Role-Based Access Control (RBAC) for various user roles (Owner, Project Manager, Design Manager, Designer, Social Media Specialist)
+  - Dashboard & Analytics with detailed overviews, filtering, search, and report export
+  - Real-time Notifications (in-app and email)
+  - Collaboration (task comments, project activity feed)
+  - Bilingual interface with RTL support for Arabic
+
+## 2. Key Security Requirements & Constraints
+
+- **Security First:**
+  - Ensure robust authentication with admin-only registration.
+  - Use AES-256 encryption for sensitive data such as social media credentials.
+  - Secure data in transit using HTTPS (TLS 1.2+).
+  - Incorporate Role-Based Access Control (RBAC) to manage permissions.
+  - Environment-level secrets and optional 2FA for added security.
+
+- **Input Handling & Data Protection:**
+  - Use input validation and output encoding to prevent injection, XSS, and other attacks.
+  - Secure file uploads on Supabase Storage with proper validation.
+
+- **Infrastructure & Crypto:**
+  - Leverage strong cryptography (AES-256) for data at rest and secure API communications.
+  - Use secure defaults, strict privileges, and environmental variables for secrets.
+
+- **Operational Security:**
+  - Maintain secure server configurations and update dependencies regularly.
+  - Protect API endpoints with rate limiting, secure CORS policies, and proper HTTP verb usage.
+
+## 3. Tech Stack
+
+- **Frontend:**
+  - **Framework:** React or Next.js
+  - **Styling:** Tailwind CSS
+  - **Fonts:** IBM Plex Arabic
+  - **Design:** Clean, modern, and minimal (Apple-style UX) with responsiveness optimized for desktops.
+  
+- **Backend:**
+  - **Database and Storage:** Supabase
+  - **API Services:** Node.js/Express or equivalent
+
+- **Security Components:**
+  - **Encryption:** AES-256 for sensitive data
+  - **Transport Security:** Mandatory HTTPS (SSL/TLS)
+  - **RBAC:** Role-based access control for fine-grained permissions
+  - **Secrets Management:** Use environment variables and dedicated management solutions
+
+## 4. Design & UI Preferences
+
+- **Layout:**
+  - Tabbed project views (Tasks, Files, Social, Stats).
+  - Filtering options: Status, subscription type, assigned user, due date, task type.
+  - Global search and sorting functions.
+  - Fixed layout with optional widget toggles.
+
+- **Styling:**
+  - Primary Color: #EE5131
+  - Accent Color: #00B7A5
+  - Background (Light Mode): #FFFFFF
+  - Text Color: #000000
+  - Consistent use of rounded corners and simple iconography (e.g., Lucide icons).
+
+- **Language & Accessibility:**
+  - Bilingual support for Arabic and English, with RTL implementation for Arabic.
+
+## 5. Notifications & Collaboration
+
+- **Notifications:**
+  - **In-app:** Primary notifications for task deadlines, assignments, and status updates.
+  - **Email:** Secondary notifications for significant events, such as new task assignments and deadlines.
+
+- **Collaboration Tools:**
+  - Task comments for team interactions.
+  - Project activity feed to log all changes.
+
+## 6. Development & Future Considerations
+
+- **Scalability:** Designed to seamlessly accommodate future integrations (e.g., CRM systems, marketing platforms) despite no such integrations being required initially.
+- **User Management:** Admin-only user registration to enhance security.
+- **File Storage:** Internal management using Supabase Storage ensures controlled data flow.
+
+## 7. Step-by-Step Implementation Guide
+
+1. **Setup and Environment Configuration:**
+   - Configure secure server and environment settings.
+   - Integrate secure dependency management and regular vulnerability scanning.
+
+2. **Backend API Development:**
+   - Build the API using Node.js/Express with stringent input validation and error handling.
+   - Implement robust authentication, RBAC, and session management.
+   - Ensure secure file handling for uploads to Supabase.
+
+3. **Frontend Development:**
+   - Develop the dashboard using React/Next.js with Tailwind CSS.
+   - Integrate bilingual interfaces (with RTL support for Arabic) and mobile responsiveness.
+   - Implement dynamic filtering, sorting, and search components.
+
+4. **Security Enhancements:**
+   - Integrate AES-256 encryption and HTTPS for data transfer.
+   - Establish secure API endpoints with appropriate rate limiting and CORS configurations.
+   - Apply Content Security Policy (CSP) and secure HTTP headers (e.g., Strict-Transport-Security, X-Frame-Options).
+
+5. **Testing and QA:**
+   - Perform thorough testing (unit, integration, penetration) and code reviews focusing on both functionality and security.
+   - Ensure that error handling does not leak sensitive information.
+
+6. **Deployment:**
+   - Harden the production environment by disabling debug features and applying secure defaults.
+   - Set up continuous monitoring and logging for security events.
+
+## Conclusion
+
+This implementation plan is designed with security at its core while providing the flexibility to expand as the project evolves. Following the described steps and security practices will lead to a robust, scalable, and secure creative project management dashboard.
+

@@ -1,0 +1,23 @@
+{
+  "name": "montajko",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "my-dashboard"
+  ],
+  "scripts": {
+    "dev": "cd my-dashboard && npm run dev",
+    "build": "cd my-dashboard && npm run build",
+    "start": "cd my-dashboard && npm run start",
+    "lint": "cd my-dashboard && npm run lint"
+  },
+  "dependencies": {
+    "@types/uuid": "^10.0.0",
+    "framer-motion": "^12.6.5",
+    "lucide-react": "^0.487.0",
+    "next-themes": "^0.4.6",
+    "react-dropzone": "^14.3.8",
+    "react-hot-toast": "^2.5.2",
+    "uuid": "^11.1.0"
+  }
+}

@@ -1,0 +1,92 @@
+---
+description: Apply these rules when making changes to the project
+globs:
+alwaysApply: true
+---
+
+Update this rule if user requested changes to the project requirement, etc.
+# Frontend Guideline Document
+
+This document provides an in-depth look into the frontend architecture, design principles, and technologies used in our creative dashboard project. It has been written in everyday language, making it accessible to everyone, regardless of technical background. Below, we break down the various components and guidelines that form our frontend setup.
+
+## 1. Frontend Architecture
+
+Our overall frontend architecture is built using a modern JavaScript framework – either React or Next.js. This decision supports clear separation of concerns by organizing code into reusable components. Here are the key aspects:
+
+- **Framework & Library Choices:** We use React/Next.js for rendering interactive UIs. Tailwind CSS is chosen for styling, ensuring the interface is responsive and attractive. We also integrate IBM Plex Arabic font to support our bilingual setup with a consistent look.
+- **Component-Based Structure:** Our application is built using components organized in a modular fashion. This supports scalability and maintainability, as components can be reused and maintained independently.
+- **Scalability & Performance:** The chosen architecture supports adding more features over time. We use server-side rendering and static site generation (where applicable) to enhance performance, and code splitting helps reduce load times. This ensures that the application remains fast and responsive even as it scales.
+
+## 2. Design Principles
+
+We design with the end-user in mind, especially creative agency owners, project managers, and designers. Our design is guided by the following principles:
+
+- **Usability:** The interface is simple and intuitive. We emphasize clear navigation and easy access to the most important function areas like managing projects, tasks, and team collaboration.
+- **Accessibility:** We make sure our app is easy for everyone to use. This includes text legibility, proper contrast, and support for RTL (right-to-left) layout when Arabic is selected.
+- **Responsiveness:** Our design adapts to different screens, ensuring a flawless experience on both desktops and mobile devices. The layout is optimized primarily for desktop use while still being mobile-friendly.
+
+## 3. Styling and Theming
+
+Styling is a key part of our project, and we use Tailwind CSS to create a clean, modern, and minimal look similar to the Apple-style user experience. Here are the specifics:
+
+- **CSS Methodology:** We are using Tailwind CSS, which provides utility-first classes to craft designs quickly. This approach promotes consistency and a clear structure.
+- **Theming:** Although we are currently focusing on a clean and modern theme, the system is designed to easily incorporate different themes, like dark/light mode if needed. For now, the app follows a minimal style with flat design elements and a touch of modern aesthetics.
+- **Style Guide:**
+  - **Design Style:** Clean, modern, minimal interface with clear typography and tidy layouts.
+  - **Primary Color:** #EE5131 – used for buttons, highlights, and active states.
+  - **Accent Color:** #00B7A5 – used for secondary actions and subtle highlights.
+  - **Font:** IBM Plex Arabic is used to ensure consistency across both English and Arabic interfaces.
+
+## 4. Component Structure
+
+Our frontend is built using a component-based architecture that divides the UI into manageable pieces. The structure includes:
+
+- **Modularity:** Components (like buttons, modals, tabs, and form elements) are independently built and maintained. This helps to reuse them across various views (e.g., dashboard, project views, and task management interfaces).
+- **Separation of Concerns:** Each component handles its own functionality, allowing developers to work on individual parts without affecting the entire system. The tabbed project view is a good example of how we split functionality into discrete, manageable parts.
+- **Reusability:** Components are designed to be generic where possible. This drives efficiency and consistency, as the same component can be used in multiple places with different data.
+
+## 5. State Management
+
+Managing the dynamic data of our dashboard is crucial. Here's our approach:
+
+- **Centralized State Management:** We plan to use state management solutions such as Redux or the Context API to manage state across components efficiently.
+- **Shared Data:** Global states like user authentication, project data, and task updates are managed centrally, ensuring that changes are reflected immediately across the interface. This results in a smooth and consistent user experience.
+- **Local Component State:** For components that have a limited scope, we use React hooks to manage local state, keeping our components efficient and easy to maintain.
+
+## 6. Routing and Navigation
+
+To help users navigate our dashboard seamlessly, we have the following routing design:
+
+- **Routing Library:** We are using React Router (or Next.js routing if Next.js is chosen) to manage different paths and ensure the URL matches the content being displayed.
+- **Navigation Structure:** The dashboard uses a fixed layout with a sidebar for primary navigation and tabbed views within the project pages. This structure helps users quickly access clients, tasks, file management, and collaboration features.
+- **Bilingual Support:** Routing takes into account language preferences with support for both English and Arabic, including RTL adjustments for Arabic content.
+
+## 7. Performance Optimization
+
+Performance is a top priority. Here are our key strategies:
+
+- **Lazy Loading and Code Splitting:** Components and modules not required immediately are loaded on demand. This reduces the initial load time, contributing to faster device performance.
+- **Asset Optimization:** Images and other assets are optimized for quick loading. We ensure that our CSS and JavaScript bundles are minimized and compressed.
+- **Caching and SSR:** With strategies like server-side rendering, we improve load times and ensure content is delivered quickly.
+
+## 8. Testing and Quality Assurance
+
+Quality is ensured through a rigorous testing setup. We incorporate multiple testing strategies:
+
+- **Unit Testing:** Individual components are tested with tools such as Jest to ensure they work as expected.
+- **Integration Testing:** Tests ensure that components interact correctly using libraries such as React Testing Library.
+- **End-to-End Testing:** We run full user-flow tests using tools like Cypress to simulate real-world experience and ensure that all parts of the application work as intended.
+- **Continuous Integration:** Automated pipelines check for errors and regressions, ensuring that every change maintains high quality.
+
+## 9. Conclusion and Overall Frontend Summary
+
+To sum up, our frontend setup is built to support a clean, modern, and efficient dashboard for creative agencies. Here’s a recap:
+
+- A robust, component-based architecture using React/Next.js and Tailwind CSS ensures scalability and maintainability.
+- We adhere to design principles that prioritize usability, accessibility, and responsiveness. Bilingual content with RTL support is a key feature.
+- Styling follows a careful theme with a primary color (#EE5131), an accent color (#00B7A5), and IBM Plex Arabic font to maintain consistency across languages.
+- Our component structure and state management solutions make the system efficient, easy to update, and delightful for end users.
+- Routing is intuitive, supporting smooth navigation across application sections, while performance optimizations ensure quick load times.
+- Rigorous testing and quality assurance through unit, integration, and E2E tests ensure a high-quality product.
+
+This frontend guideline sets the foundation for building a user-friendly, secure, and responsive dashboard. It reflects our commitment to delivering a tool that meets creative agencies' needs while being flexible enough to scale and adapt as the project grows.
