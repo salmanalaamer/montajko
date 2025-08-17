@@ -539,7 +539,9 @@ export default function ProjectDetailPage() {
         <TaskForm
           onSubmit={handleAddTask}
           onCancel={() => setIsTaskModalOpen(false)}
-          initialData={{ project: project.name }}
+          initialData={{ projectId: project.id }}
+          users={[]}
+          projects={[]}
         />
       </Modal>
     </AppLayout>

@@ -1,33 +1,67 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronRight, Users, FolderOpen, Calendar, BarChart3, Settings, TrendingUp, Clock, Star, Activity, Target } from 'lucide-react'
 import AppLayout from '@/components/layout/AppLayout'
+import { database, Project, Task, User } from '@/lib/database'
 
 export default function HomePage() {
   const router = useRouter()
   const [currentTime, setCurrentTime] = useState(new Date())
+  const [projects, setProjects] = useState<Project[]>([])
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [users, setUsers] = useState<User[]>([])
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
+
+  // Load data on component mount
+  useEffect(() => {
+    loadData()
+  }, [])
 
   // Update time every minute
-  useState(() => {
+  useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000)
     return () => clearInterval(timer)
-  })
+  }, [])
+
+  const loadData = () => {
+    const projectsData = database.getProjects()
+    const tasksData = database.getTasks()
+    const usersData = database.getUsers()
+    const currentUserData = database.getCurrentUser()
+    
+    setProjects(projectsData)
+    setTasks(tasksData)
+    setUsers(usersData)
+    setCurrentUser(currentUserData)
+  }
+
+  // Calculate real-time stats
+  const projectStats = database.getProjectStats()
+  const taskStats = database.getTaskStats()
 
   const stats = [
-    { title: 'المشاريع النشطة', value: '12', icon: FolderOpen, color: 'text-blue-600', bg: 'bg-blue-100' },
-    { title: 'المهام المكتملة', value: '89', icon: Calendar, color: 'text-green-600', bg: 'bg-green-100' },
-    { title: 'أعضاء الفريق', value: '24', icon: Users, color: 'text-purple-600', bg: 'bg-purple-100' },
-    { title: 'التقارير', value: '156', icon: BarChart3, color: 'text-orange-600', bg: 'bg-orange-100' },
+    { title: 'المشاريع النشطة', value: projectStats.active.toString(), icon: FolderOpen, color: 'text-blue-600', bg: 'bg-blue-100' },
+    { title: 'المهام المكتملة', value: taskStats.completed.toString(), icon: Calendar, color: 'text-green-600', bg: 'bg-green-100' },
+    { title: 'أعضاء الفريق', value: users.length.toString(), icon: Users, color: 'text-purple-600', bg: 'bg-purple-100' },
+    { title: 'إجمالي المشاريع', value: projectStats.total.toString(), icon: BarChart3, color: 'text-orange-600', bg: 'bg-orange-100' },
   ]
 
-  const recentProjects = [
-    { name: 'تطوير موقع الشركة الجديد', status: 'قيد التنفيذ', progress: 75, team: 5 },
-    { name: 'حملة التسويق الرقمي', status: 'في المراجعة', progress: 90, team: 3 },
-    { name: 'تصميم الهوية البصرية', status: 'مكتمل', progress: 100, team: 2 },
-    { name: 'تطبيق الجوال', status: 'قيد التخطيط', progress: 25, team: 8 },
-  ]
+  // Get recent projects (last 4)
+  const recentProjects = projects
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+    .slice(0, 4)
+    .map(project => ({
+      id: project.id,
+      name: project.name,
+      status: project.status === 'active' ? 'قيد التنفيذ' :
+              project.status === 'completed' ? 'مكتمل' :
+              project.status === 'planning' ? 'قيد التخطيط' :
+              project.status === 'paused' ? 'متوقف' : 'ملغي',
+      progress: project.progress,
+      team: project.teamMembers.length
+    }))
 
   const quickActions = [
     { 
@@ -68,7 +102,7 @@ export default function HomePage() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl lg:text-3xl font-bold mb-2">
-                  مرحباً بك يا أحمد 👋
+                  مرحباً بك يا {currentUser?.name || 'مستخدم'} 👋
                 </h2>
                 <p className="text-primary-100 text-lg mb-4">
                   اليوم {currentTime.toLocaleDateString('ar-SA', { 
@@ -79,7 +113,7 @@ export default function HomePage() {
                   })}
                 </p>
                 <p className="text-primary-100">
-                  لديك 3 مهام جديدة ومشروعان يحتاجان متابعة
+                  لديك {tasks.filter(t => t.status === 'todo').length} مهمة جديدة و{projectStats.active} مشروع نشط
                 </p>
               </div>
               <div className="hidden lg:flex items-center">
@@ -155,7 +189,11 @@ export default function HomePage() {
           <div className="card">
             <div className="space-y-4">
               {recentProjects.map((project, index) => (
-                <div key={index} className="flex items-center justify-between p-4 bg-secondary-50 rounded-lg hover:bg-secondary-100 transition-colors">
+                <div 
+                  key={project.id} 
+                  className="flex items-center justify-between p-4 bg-secondary-50 rounded-lg hover:bg-secondary-100 transition-colors cursor-pointer"
+                  onClick={() => router.push(`/projects/${project.id}`)}
+                >
                   <div className="flex-1">
                     <h4 className="font-semibold text-secondary-900 mb-1">{project.name}</h4>
                     <div className="flex items-center space-x-4 space-x-reverse text-sm text-secondary-600">
@@ -199,9 +237,11 @@ export default function HomePage() {
             <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
               <div className="flex items-center justify-between mb-4">
                 <TrendingUp className="w-8 h-8" />
-                <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">هذا الشهر</span>
+                <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">إجمالي</span>
               </div>
-              <p className="text-3xl font-bold mb-1">87%</p>
+              <p className="text-3xl font-bold mb-1">
+                {taskStats.total > 0 ? Math.round((taskStats.completed / taskStats.total) * 100) : 0}%
+              </p>
               <p className="text-blue-100">معدل إنجاز المهام</p>
             </div>
             
@@ -210,8 +250,8 @@ export default function HomePage() {
                 <Target className="w-8 h-8" />
                 <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">نشط</span>
               </div>
-              <p className="text-3xl font-bold mb-1">24</p>
-              <p className="text-green-100">مهمة مكتملة</p>
+              <p className="text-3xl font-bold mb-1">{taskStats.inProgress}</p>
+              <p className="text-green-100">مهمة قيد التنفيذ</p>
             </div>
             
             <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-6 text-white">
@@ -219,17 +259,17 @@ export default function HomePage() {
                 <Users className="w-8 h-8" />
                 <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">فعال</span>
               </div>
-              <p className="text-3xl font-bold mb-1">12</p>
-              <p className="text-purple-100">عضو فريق نشط</p>
+              <p className="text-3xl font-bold mb-1">{users.length}</p>
+              <p className="text-purple-100">عضو فريق</p>
             </div>
             
             <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white">
               <div className="flex items-center justify-between mb-4">
                 <Clock className="w-8 h-8" />
-                <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">متوسط</span>
+                <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">متأخر</span>
               </div>
-              <p className="text-3xl font-bold mb-1">2.5</p>
-              <p className="text-orange-100">ساعة يومياً</p>
+              <p className="text-3xl font-bold mb-1">{taskStats.overdue}</p>
+              <p className="text-orange-100">مهمة متأخرة</p>
             </div>
           </div>
         </div>

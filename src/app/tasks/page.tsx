@@ -1,377 +1,566 @@
 'use client'
 
-import { useState } from 'react'
-import { Plus, Search, Filter, Calendar, User, CheckCircle, Edit, Trash2, Clock } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { 
+  Plus, 
+  Search, 
+  Filter, 
+  Calendar,
+  User,
+  Clock,
+  AlertTriangle,
+  CheckCircle2,
+  PlayCircle,
+  Eye,
+  Edit,
+  Trash2,
+  FolderOpen,
+  Tag,
+  Users
+} from 'lucide-react'
 import AppLayout from '@/components/layout/AppLayout'
-import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
-import TaskForm, { TaskData } from '@/components/forms/TaskForm'
+import Modal from '@/components/ui/Modal'
+import TaskForm from '@/components/forms/TaskForm'
+import { database, Task, Project, User as UserType } from '@/lib/database'
 
-interface Task extends TaskData {
-  id: string
-  createdAt: string
-}
+type StatusFilter = 'all' | 'todo' | 'in-progress' | 'review' | 'completed'
+type PriorityFilter = 'all' | 'urgent' | 'high' | 'medium' | 'low'
+type ViewMode = 'board' | 'list'
 
 export default function TasksPage() {
-  const [tasks, setTasks] = useState<Task[]>([
-    {
-      id: '1',
-      title: 'تصميم واجهة المستخدم الرئيسية',
-      description: 'تصميم وتطوير الواجهة الرئيسية للموقع مع مراعاة تجربة المستخدم',
-      assignee: 'فاطمة علي',
-      dueDate: '2024-02-15',
-      priority: 'عالي',
-      status: 'قيد التنفيذ',
-      project: 'تطوير موقع الشركة الجديد',
-      estimatedHours: '16',
-      createdAt: '2024-01-20'
-    },
-    {
-      id: '2',
-      title: 'إنشاء المحتوى التسويقي',
-      description: 'كتابة وتصميم المحتوى التسويقي لمنصات التواصل الاجتماعي',
-      assignee: 'نورا حسن',
-      dueDate: '2024-02-10',
-      priority: 'متوسط',
-      status: 'في المراجعة',
-      project: 'حملة التسويق الرقمي',
-      estimatedHours: '12',
-      createdAt: '2024-02-01'
-    },
-    {
-      id: '3',
-      title: 'تطوير API المنتجات',
-      description: 'برمجة وتطوير واجهة برمجة التطبيقات للمنتجات',
-      assignee: 'أحمد محمد',
-      dueDate: '2024-02-20',
-      priority: 'عالي',
-      status: 'جديد',
-      project: 'تطبيق الجوال',
-      estimatedHours: '24',
-      createdAt: '2024-02-05'
-    },
-    {
-      id: '4',
-      title: 'مراجعة الشعار النهائي',
-      description: 'مراجعة وتطوير الشعار النهائي للعلامة التجارية',
-      assignee: 'سارة محمود',
-      dueDate: '2024-01-30',
-      priority: 'منخفض',
-      status: 'مكتمل',
-      project: 'تصميم الهوية البصرية',
-      estimatedHours: '4',
-      createdAt: '2024-01-15'
-    },
-    {
-      id: '5',
-      title: 'اختبار الأداء',
-      description: 'اختبار أداء الموقع وتحسين سرعة التحميل',
-      assignee: 'عبدالله سالم',
-      dueDate: '2024-02-25',
-      priority: 'عاجل',
-      status: 'قيد التنفيذ',
-      project: 'تطوير موقع الشركة الجديد',
-      estimatedHours: '8',
-      createdAt: '2024-02-10'
-    }
-  ])
-
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const router = useRouter()
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [projects, setProjects] = useState<Project[]>([])
+  const [users, setUsers] = useState<UserType[]>([])
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
+  const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>('all')
+  const [projectFilter, setProjectFilter] = useState<string>('all')
+  const [assigneeFilter, setAssigneeFilter] = useState<string>('all')
+  const [viewMode, setViewMode] = useState<ViewMode>('board')
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [filterStatus, setFilterStatus] = useState<string>('الكل')
-  const [filterPriority, setFilterPriority] = useState<string>('الكل')
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [deletingTask, setDeletingTask] = useState<Task | null>(null)
 
-  const handleAddTask = (taskData: TaskData) => {
-    const newTask: Task = {
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  useEffect(() => {
+    applyFilters()
+  }, [tasks, searchQuery, statusFilter, priorityFilter, projectFilter, assigneeFilter])
+
+  const loadData = () => {
+    const tasksData = database.getTasks()
+    const projectsData = database.getProjects()
+    const usersData = database.getUsers()
+    setTasks(tasksData)
+    setProjects(projectsData)
+    setUsers(usersData)
+  }
+
+  const applyFilters = () => {
+    let filtered = [...tasks]
+
+    // Search filter
+    if (searchQuery) {
+      filtered = filtered.filter(task =>
+        task.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        task.description.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    }
+
+    // Status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(task => task.status === statusFilter)
+    }
+
+    // Priority filter
+    if (priorityFilter !== 'all') {
+      filtered = filtered.filter(task => task.priority === priorityFilter)
+    }
+
+    // Project filter
+    if (projectFilter !== 'all') {
+      filtered = filtered.filter(task => task.projectId === projectFilter)
+    }
+
+    // Assignee filter
+    if (assigneeFilter !== 'all') {
+      filtered = filtered.filter(task => task.assignedTo === assigneeFilter)
+    }
+
+    setFilteredTasks(filtered)
+  }
+
+  const handleCreateTask = (taskData: any) => {
+    const currentUser = database.getCurrentUser()
+    if (!currentUser) return
+
+    database.createTask({
       ...taskData,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString().split('T')[0]
-    }
-    setTasks(prev => [newTask, ...prev])
-    setIsModalOpen(false)
+      createdBy: currentUser.id
+    })
+    
+    loadData()
+    setIsCreateModalOpen(false)
+    showSuccessMessage('تم إنشاء المهمة بنجاح!')
   }
 
-  const handleEditTask = (taskData: TaskData) => {
-    if (editingTask) {
-      setTasks(prev => 
-        prev.map(t => 
-          t.id === editingTask.id 
-            ? { ...t, ...taskData }
-            : t
-        )
-      )
-      setEditingTask(null)
-      setIsModalOpen(false)
-    }
-  }
-
-  const handleDeleteTask = (taskId: string) => {
-    if (confirm('هل أنت متأكد من حذف هذه المهمة؟')) {
-      setTasks(prev => prev.filter(t => t.id !== taskId))
-    }
-  }
-
-  const handleStatusChange = (taskId: string, newStatus: TaskData['status']) => {
-    setTasks(prev => 
-      prev.map(t => 
-        t.id === taskId 
-          ? { ...t, status: newStatus }
-          : t
-      )
-    )
-  }
-
-  const openEditModal = (task: Task) => {
-    setEditingTask(task)
-    setIsModalOpen(true)
-  }
-
-  const closeModal = () => {
-    setIsModalOpen(false)
+  const handleEditTask = (taskData: any) => {
+    if (!editingTask) return
+    
+    database.updateTask(editingTask.id, taskData)
+    loadData()
+    setIsEditModalOpen(false)
     setEditingTask(null)
+    showSuccessMessage('تم تحديث المهمة بنجاح!')
   }
 
-  const getStatusColor = (status: string) => {
+  const handleDeleteTask = () => {
+    if (!deletingTask) return
+    
+    const tasks = database.getTasks()
+    const filteredTasks = tasks.filter(task => task.id !== deletingTask.id)
+    database['setStorageData']('montajko_tasks', filteredTasks)
+    
+    loadData()
+    setIsDeleteModalOpen(false)
+    setDeletingTask(null)
+    showSuccessMessage('تم حذف المهمة بنجاح!')
+  }
+
+  const updateTaskStatus = (taskId: string, newStatus: Task['status']) => {
+    database.updateTask(taskId, { status: newStatus })
+    loadData()
+  }
+
+  const showSuccessMessage = (message: string) => {
+    const toast = document.createElement('div')
+    toast.className = 'fixed top-4 left-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50'
+    toast.textContent = message
+    document.body.appendChild(toast)
+    
+    setTimeout(() => {
+      toast.remove()
+    }, 3000)
+  }
+
+  const getStatusColor = (status: Task['status']) => {
     switch (status) {
-      case 'مكتمل': return 'bg-green-100 text-green-800 border-green-200'
-      case 'قيد التنفيذ': return 'bg-blue-100 text-blue-800 border-blue-200'
-      case 'في المراجعة': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-      case 'جديد': return 'bg-gray-100 text-gray-800 border-gray-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
+      case 'todo': return 'text-gray-600 bg-gray-100'
+      case 'in-progress': return 'text-blue-600 bg-blue-100'
+      case 'review': return 'text-yellow-600 bg-yellow-100'
+      case 'completed': return 'text-green-600 bg-green-100'
+      default: return 'text-gray-600 bg-gray-100'
     }
   }
 
-  const getPriorityColor = (priority: string) => {
+  const getPriorityColor = (priority: Task['priority']) => {
     switch (priority) {
-      case 'عاجل': return 'text-red-600 bg-red-50 border-red-200'
-      case 'عالي': return 'text-orange-600 bg-orange-50 border-orange-200'
-      case 'متوسط': return 'text-blue-600 bg-blue-50 border-blue-200'
-      case 'منخفض': return 'text-green-600 bg-green-50 border-green-200'
-      default: return 'text-gray-600 bg-gray-50 border-gray-200'
+      case 'urgent': return 'border-r-4 border-red-500'
+      case 'high': return 'border-r-4 border-orange-500'
+      case 'medium': return 'border-r-4 border-yellow-500'
+      case 'low': return 'border-r-4 border-green-500'
+      default: return 'border-r-4 border-gray-300'
     }
   }
 
-  const getDaysRemaining = (dueDate: string) => {
-    const today = new Date()
-    const due = new Date(dueDate)
-    const diffTime = due.getTime() - today.getTime()
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    return diffDays
+  const getStatusIcon = (status: Task['status']) => {
+    switch (status) {
+      case 'todo': return Clock
+      case 'in-progress': return PlayCircle
+      case 'review': return Eye
+      case 'completed': return CheckCircle2
+      default: return Clock
+    }
   }
 
-  const filteredTasks = tasks.filter(task => {
-    const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         task.assignee.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         task.project.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = filterStatus === 'الكل' || task.status === filterStatus
-    const matchesPriority = filterPriority === 'الكل' || task.priority === filterPriority
-    return matchesSearch && matchesStatus && matchesPriority
-  })
+  const getProjectName = (projectId: string) => {
+    return projects.find(p => p.id === projectId)?.name || 'مشروع غير معروف'
+  }
 
-  const statusCounts = {
-    total: tasks.length,
-    new: tasks.filter(t => t.status === 'جديد').length,
-    inProgress: tasks.filter(t => t.status === 'قيد التنفيذ').length,
-    inReview: tasks.filter(t => t.status === 'في المراجعة').length,
-    completed: tasks.filter(t => t.status === 'مكتمل').length
+  const getUserName = (userId: string) => {
+    return users.find(u => u.id === userId)?.name || 'غير محدد'
+  }
+
+  const isOverdue = (dueDate?: string) => {
+    if (!dueDate) return false
+    return new Date(dueDate) < new Date() && true
+  }
+
+  const tasksByStatus = {
+    todo: filteredTasks.filter(t => t.status === 'todo'),
+    'in-progress': filteredTasks.filter(t => t.status === 'in-progress'),
+    review: filteredTasks.filter(t => t.status === 'review'),
+    completed: filteredTasks.filter(t => t.status === 'completed')
+  }
+
+  const TaskCard = ({ task }: { task: Task }) => {
+    const StatusIcon = getStatusIcon(task.status)
+    const overdue = isOverdue(task.dueDate)
+    
+    return (
+      <div className={`bg-white rounded-xl shadow-sm border hover:shadow-md transition-all duration-200 p-4 ${getPriorityColor(task.priority)}`}>
+        {/* Header */}
+        <div className="flex items-start justify-between mb-3">
+          <h3 className="font-semibold text-gray-900 text-sm line-clamp-2 flex-1">
+            {task.name}
+          </h3>
+          <div className="flex items-center space-x-1 space-x-reverse ml-2">
+            <button
+              onClick={() => {
+                setEditingTask(task)
+                setIsEditModalOpen(true)
+              }}
+              className="p-1 text-gray-400 hover:text-blue-600 rounded"
+            >
+              <Edit className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => {
+                setDeletingTask(task)
+                setIsDeleteModalOpen(true)
+              }}
+              className="p-1 text-gray-400 hover:text-red-600 rounded"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Description */}
+        {task.description && (
+          <p className="text-xs text-gray-600 mb-3 line-clamp-2">
+            {task.description}
+          </p>
+        )}
+
+        {/* Tags */}
+        {task.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-3">
+            {task.tags.slice(0, 2).map(tag => (
+              <span
+                key={tag}
+                className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full"
+              >
+                {tag}
+              </span>
+            ))}
+            {task.tags.length > 2 && (
+              <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                +{task.tags.length - 2}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Project */}
+        <div className="flex items-center text-xs text-gray-500 mb-3">
+          <FolderOpen className="w-3 h-3 ml-1" />
+          <span className="truncate">{getProjectName(task.projectId)}</span>
+        </div>
+
+        {/* Due Date */}
+        {task.dueDate && (
+          <div className={`flex items-center text-xs mb-3 ${overdue ? 'text-red-600' : 'text-gray-500'}`}>
+            <Calendar className="w-3 h-3 ml-1" />
+            <span>{new Date(task.dueDate).toLocaleDateString('ar-SA')}</span>
+            {overdue && <AlertTriangle className="w-3 h-3 mr-1" />}
+          </div>
+        )}
+
+        {/* Assignee */}
+        {task.assignedTo && (
+          <div className="flex items-center text-xs text-gray-500 mb-3">
+            <User className="w-3 h-3 ml-1" />
+            <span>{getUserName(task.assignedTo)}</span>
+          </div>
+        )}
+
+        {/* Priority */}
+        <div className="flex items-center justify-between">
+          <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+            task.priority === 'urgent' ? 'bg-red-100 text-red-700' :
+            task.priority === 'high' ? 'bg-orange-100 text-orange-700' :
+            task.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+            'bg-green-100 text-green-700'
+          }`}>
+            {task.priority === 'urgent' && 'عاجل'}
+            {task.priority === 'high' && 'عالي'}
+            {task.priority === 'medium' && 'متوسط'}
+            {task.priority === 'low' && 'منخفض'}
+          </span>
+
+          {/* Status Actions */}
+          <div className="flex items-center space-x-1 space-x-reverse">
+            {task.status !== 'completed' && (
+              <button
+                onClick={() => updateTaskStatus(task.id, 'completed')}
+                className="p-1 text-gray-400 hover:text-green-600 rounded"
+                title="إكمال المهمة"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+              </button>
+            )}
+            {task.status === 'todo' && (
+              <button
+                onClick={() => updateTaskStatus(task.id, 'in-progress')}
+                className="p-1 text-gray-400 hover:text-blue-600 rounded"
+                title="بدء المهمة"
+              >
+                <PlayCircle className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
     <AppLayout 
       title="إدارة المهام"
-      description="تتبع وإدارة جميع مهام فريقك"
+      description="عرض وإدارة جميع مهام المشاريع"
     >
-      <div className="p-6 lg:p-8">
-        {/* Action Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-4 space-x-reverse">
-            <div className="bg-green-100 p-3 rounded-xl">
-              <CheckCircle className="w-6 h-6 text-green-600" />
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold text-secondary-900">مركز إدارة المهام</h2>
-              <p className="text-sm text-secondary-500">تنظيم ومتابعة جميع المهام</p>
+      <div className="p-6">
+        {/* Header Actions */}
+        <div className="flex flex-col lg:flex-row gap-4 mb-6">
+          {/* Search */}
+          <div className="flex-1">
+            <div className="relative">
+              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="البحث في المهام..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-4 pr-12 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              />
             </div>
           </div>
-          
+
+          {/* Filters */}
+          <div className="flex gap-3 flex-wrap">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+              className="px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              <option value="all">كل الحالات</option>
+              <option value="todo">مهام جديدة</option>
+              <option value="in-progress">قيد التنفيذ</option>
+              <option value="review">قيد المراجعة</option>
+              <option value="completed">مكتملة</option>
+            </select>
+
+            <select
+              value={projectFilter}
+              onChange={(e) => setProjectFilter(e.target.value)}
+              className="px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              <option value="all">كل المشاريع</option>
+              {projects.map(project => (
+                <option key={project.id} value={project.id}>{project.name}</option>
+              ))}
+            </select>
+
+            <select
+              value={assigneeFilter}
+              onChange={(e) => setAssigneeFilter(e.target.value)}
+              className="px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              <option value="all">كل الأعضاء</option>
+              {users.map(user => (
+                <option key={user.id} value={user.id}>{user.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Create Button */}
           <Button
-            onClick={() => setIsModalOpen(true)}
-            icon={Plus}
+            onClick={() => setIsCreateModalOpen(true)}
+            className="flex items-center space-x-2 space-x-reverse"
           >
-            مهمة جديدة
+            <Plus className="w-5 h-5" />
+            <span>مهمة جديدة</span>
           </Button>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-          <div className="bg-white rounded-lg p-4 border border-secondary-200">
-            <div className="text-2xl font-bold text-secondary-900">{statusCounts.total}</div>
-            <div className="text-sm text-secondary-600">إجمالي المهام</div>
-          </div>
-          <div className="bg-white rounded-lg p-4 border border-gray-200">
-            <div className="text-2xl font-bold text-gray-600">{statusCounts.new}</div>
-            <div className="text-sm text-gray-600">جديد</div>
-          </div>
-          <div className="bg-white rounded-lg p-4 border border-blue-200">
-            <div className="text-2xl font-bold text-blue-600">{statusCounts.inProgress}</div>
-            <div className="text-sm text-blue-600">قيد التنفيذ</div>
-          </div>
-          <div className="bg-white rounded-lg p-4 border border-yellow-200">
-            <div className="text-2xl font-bold text-yellow-600">{statusCounts.inReview}</div>
-            <div className="text-sm text-yellow-600">في المراجعة</div>
-          </div>
-          <div className="bg-white rounded-lg p-4 border border-green-200">
-            <div className="text-2xl font-bold text-green-600">{statusCounts.completed}</div>
-            <div className="text-sm text-green-600">مكتمل</div>
-          </div>
+
+        {/* Tasks Count */}
+        <div className="mb-6">
+          <p className="text-sm text-gray-600">
+            عرض {filteredTasks.length} من {tasks.length} مهمة
+          </p>
         </div>
 
-        {/* Filters */}
-        <div className="bg-white rounded-xl shadow-sm border border-secondary-200 p-6 mb-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-            <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 sm:space-x-reverse">
-              <div className="relative">
-                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-secondary-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="البحث في المهام..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-10 py-2 border border-secondary-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 w-full sm:w-64"
-                />
-              </div>
-              
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-4 py-2 border border-secondary-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-              >
-                <option value="الكل">جميع الحالات</option>
-                <option value="جديد">جديد</option>
-                <option value="قيد التنفيذ">قيد التنفيذ</option>
-                <option value="في المراجعة">في المراجعة</option>
-                <option value="مكتمل">مكتمل</option>
-              </select>
-
-              <select
-                value={filterPriority}
-                onChange={(e) => setFilterPriority(e.target.value)}
-                className="px-4 py-2 border border-secondary-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-              >
-                <option value="الكل">جميع الأولويات</option>
-                <option value="عاجل">عاجل</option>
-                <option value="عالي">عالي</option>
-                <option value="متوسط">متوسط</option>
-                <option value="منخفض">منخفض</option>
-              </select>
+        {/* Kanban Board */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Todo Column */}
+          <div className="bg-gray-50 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-700 flex items-center">
+                <Clock className="w-5 h-5 ml-2" />
+                مهام جديدة
+              </h3>
+              <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm">
+                {tasksByStatus.todo.length}
+              </span>
             </div>
-            
-            <div className="text-sm text-secondary-600">
-              عرض {filteredTasks.length} من {tasks.length} مهمة
+            <div className="space-y-3">
+              {tasksByStatus.todo.map(task => (
+                <TaskCard key={task.id} task={task} />
+              ))}
             </div>
           </div>
-        </div>
 
-        {/* Tasks List */}
-        <div className="space-y-4">
-          {filteredTasks.map((task) => {
-            const daysRemaining = getDaysRemaining(task.dueDate)
-            const isOverdue = daysRemaining < 0
-            const isDueSoon = daysRemaining <= 3 && daysRemaining >= 0
-
-            return (
-              <div key={task.id} className="bg-white rounded-xl shadow-sm border border-secondary-200 p-6 hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 space-x-reverse mb-3">
-                      <h3 className="text-lg font-semibold text-secondary-900">{task.title}</h3>
-                      <span className={`px-2 py-1 rounded text-xs font-medium border ${getPriorityColor(task.priority)}`}>
-                        {task.priority}
-                      </span>
-                      <span className={`px-2 py-1 rounded text-xs font-medium border ${getStatusColor(task.status)}`}>
-                        {task.status}
-                      </span>
-                    </div>
-                    
-                    <p className="text-secondary-600 text-sm mb-4">{task.description}</p>
-                    
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-secondary-500">
-                      <div className="flex items-center">
-                        <User className="w-4 h-4 ml-1" />
-                        {task.assignee}
-                      </div>
-                      <div className="flex items-center">
-                        <Calendar className={`w-4 h-4 ml-1 ${isOverdue ? 'text-red-500' : isDueSoon ? 'text-yellow-500' : ''}`} />
-                        <span className={isOverdue ? 'text-red-500 font-medium' : isDueSoon ? 'text-yellow-500 font-medium' : ''}>
-                          {task.dueDate}
-                          {isOverdue && ' (متأخر)'}
-                          {isDueSoon && !isOverdue && ` (${daysRemaining} أيام)`}
-                        </span>
-                      </div>
-                      <div className="flex items-center">
-                        <Clock className="w-4 h-4 ml-1" />
-                        {task.estimatedHours} ساعة
-                      </div>
-                      <div className="text-primary-600 font-medium">
-                        {task.project}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2 space-x-reverse">
-                    {task.status !== 'مكتمل' && (
-                      <button
-                        onClick={() => handleStatusChange(task.id, 'مكتمل')}
-                        className="p-2 text-secondary-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                        title="إكمال المهمة"
-                      >
-                        <CheckCircle className="w-4 h-4" />
-                      </button>
-                    )}
-                    <button
-                      onClick={() => openEditModal(task)}
-                      className="p-2 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteTask(task.id)}
-                      className="p-2 text-secondary-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-
-        {filteredTasks.length === 0 && (
-          <div className="text-center py-12">
-            <CheckCircle className="w-16 h-16 text-secondary-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-secondary-900 mb-2">لا توجد مهام</h3>
-            <p className="text-secondary-600">
-              {searchTerm || filterStatus !== 'الكل' || filterPriority !== 'الكل'
-                ? 'لم يتم العثور على مهام تطابق البحث'
-                : 'ابدأ بإنشاء مهمتك الأولى'
-              }
-            </p>
+          {/* In Progress Column */}
+          <div className="bg-blue-50 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-blue-700 flex items-center">
+                <PlayCircle className="w-5 h-5 ml-2" />
+                قيد التنفيذ
+              </h3>
+              <span className="bg-blue-200 text-blue-700 px-2 py-1 rounded-full text-sm">
+                {tasksByStatus['in-progress'].length}
+              </span>
+            </div>
+            <div className="space-y-3">
+              {tasksByStatus['in-progress'].map(task => (
+                <TaskCard key={task.id} task={task} />
+              ))}
+            </div>
           </div>
-        )}
+
+          {/* Review Column */}
+          <div className="bg-yellow-50 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-yellow-700 flex items-center">
+                <Eye className="w-5 h-5 ml-2" />
+                قيد المراجعة
+              </h3>
+              <span className="bg-yellow-200 text-yellow-700 px-2 py-1 rounded-full text-sm">
+                {tasksByStatus.review.length}
+              </span>
+            </div>
+            <div className="space-y-3">
+              {tasksByStatus.review.map(task => (
+                <TaskCard key={task.id} task={task} />
+              ))}
+            </div>
+          </div>
+
+          {/* Completed Column */}
+          <div className="bg-green-50 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-green-700 flex items-center">
+                <CheckCircle2 className="w-5 h-5 ml-2" />
+                مكتملة
+              </h3>
+              <span className="bg-green-200 text-green-700 px-2 py-1 rounded-full text-sm">
+                {tasksByStatus.completed.length}
+              </span>
+            </div>
+            <div className="space-y-3">
+              {tasksByStatus.completed.map(task => (
+                <TaskCard key={task.id} task={task} />
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Task Modal */}
+      {/* Create Task Modal */}
       <Modal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        title={editingTask ? 'تعديل المهمة' : 'مهمة جديدة'}
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        title="إنشاء مهمة جديدة"
         size="lg"
       >
         <TaskForm
-          onSubmit={editingTask ? handleEditTask : handleAddTask}
-          onCancel={closeModal}
-          initialData={editingTask || undefined}
+          onSubmit={handleCreateTask}
+          onCancel={() => setIsCreateModalOpen(false)}
+          users={users}
+          projects={projects}
         />
+      </Modal>
+
+      {/* Edit Task Modal */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false)
+          setEditingTask(null)
+        }}
+        title="تعديل المهمة"
+        size="lg"
+      >
+        {editingTask && (
+          <TaskForm
+            initialData={editingTask}
+            onSubmit={handleEditTask}
+            onCancel={() => {
+              setIsEditModalOpen(false)
+              setEditingTask(null)
+            }}
+            users={users}
+            projects={projects}
+          />
+        )}
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false)
+          setDeletingTask(null)
+        }}
+        title="تأكيد الحذف"
+      >
+        <div className="p-6">
+          <div className="flex items-center mb-4">
+            <AlertTriangle className="w-6 h-6 text-red-600 ml-3" />
+            <h3 className="text-lg font-semibold text-gray-900">
+              هل أنت متأكد من حذف هذه المهمة؟
+            </h3>
+          </div>
+          
+          {deletingTask && (
+            <div className="mb-6">
+              <p className="text-gray-600 mb-2">
+                المهمة: <span className="font-semibold">{deletingTask.name}</span>
+              </p>
+              <p className="text-sm text-red-600">
+                ⚠️ هذا الإجراء لا يمكن التراجع عنه.
+              </p>
+            </div>
+          )}
+          
+          <div className="flex justify-end space-x-3 space-x-reverse">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsDeleteModalOpen(false)
+                setDeletingTask(null)
+              }}
+            >
+              إلغاء
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleDeleteTask}
+              className="bg-red-600 text-white hover:bg-red-700 border-red-600"
+            >
+              حذف المهمة
+            </Button>
+          </div>
+        </div>
       </Modal>
     </AppLayout>
   )

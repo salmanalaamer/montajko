@@ -239,6 +239,7 @@ export default function AppLayout({ children, title, description }: AppLayoutPro
         <ProjectForm
           onSubmit={handleAddProject}
           onCancel={() => setIsProjectModalOpen(false)}
+          users={[]}
         />
       </Modal>
 
@@ -251,6 +252,8 @@ export default function AppLayout({ children, title, description }: AppLayoutPro
         <TaskForm
           onSubmit={handleAddTask}
           onCancel={() => setIsTaskModalOpen(false)}
+          users={[]}
+          projects={[]}
         />
       </Modal>
     </div>

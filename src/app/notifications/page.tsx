@@ -1,103 +1,30 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Bell, Check, Trash2, AlertCircle, Calendar, Users, FileText, Settings, Filter, CheckCircle, Clock, X } from 'lucide-react'
 import AppLayout from '@/components/layout/AppLayout'
 import Button from '@/components/ui/Button'
-
-interface Notification {
-  id: string
-  type: 'task' | 'project' | 'team' | 'system' | 'deadline'
-  title: string
-  message: string
-  time: string
-  isRead: boolean
-  priority: 'high' | 'medium' | 'low'
-  actionUrl?: string
-}
+import { database, Notification } from '@/lib/database'
 
 export default function NotificationsPage() {
   const [filter, setFilter] = useState('all')
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: '1',
-      type: 'deadline',
-      title: 'موعد تسليم قريب',
-      message: 'مهمة "تصميم واجهة المستخدم الرئيسية" مستحقة خلال يومين',
-      time: '2024-02-18T10:30:00',
-      isRead: false,
-      priority: 'high',
-      actionUrl: '/tasks/1'
-    },
-    {
-      id: '2',
-      type: 'project',
-      title: 'تحديث حالة المشروع',
-      message: 'تم تحديث تقدم مشروع "تطوير موقع الشركة الجديد" إلى 75%',
-      time: '2024-02-18T09:15:00',
-      isRead: false,
-      priority: 'medium',
-      actionUrl: '/projects/1'
-    },
-    {
-      id: '3',
-      type: 'team',
-      title: 'عضو فريق جديد',
-      message: 'انضم "محمد أحمد" إلى فريق مشروع التطبيق المحمول',
-      time: '2024-02-18T08:45:00',
-      isRead: true,
-      priority: 'low',
-      actionUrl: '/team'
-    },
-    {
-      id: '4',
-      type: 'task',
-      title: 'مهمة جديدة مُعينة لك',
-      message: 'تم تعيين مهمة "اختبار الأداء والأمان" لك من قبل أحمد محمد',
-      time: '2024-02-17T16:20:00',
-      isRead: false,
-      priority: 'high',
-      actionUrl: '/tasks/4'
-    },
-    {
-      id: '5',
-      type: 'system',
-      title: 'تحديث النظام',
-      message: 'تم تحديث النظام إلى الإصدار 1.2.0 مع إضافة ميزات جديدة',
-      time: '2024-02-17T14:00:00',
-      isRead: true,
-      priority: 'medium'
-    },
-    {
-      id: '6',
-      type: 'project',
-      title: 'موافقة على المشروع',
-      message: 'تمت الموافقة على مشروع "حملة التسويق الرقمي" ويمكن البدء في التنفيذ',
-      time: '2024-02-17T11:30:00',
-      isRead: false,
-      priority: 'high',
-      actionUrl: '/projects/2'
-    },
-    {
-      id: '7',
-      type: 'team',
-      title: 'تقييم الأداء',
-      message: 'تم إكمال تقييم أداء الفريق لشهر يناير، النتائج متاحة الآن',
-      time: '2024-02-16T13:15:00',
-      isRead: true,
-      priority: 'medium',
-      actionUrl: '/analytics'
-    },
-    {
-      id: '8',
-      type: 'task',
-      title: 'مهمة مكتملة',
-      message: 'أكملت سارة محمود مهمة "تصميم النماذج الأولية"',
-      time: '2024-02-16T10:45:00',
-      isRead: true,
-      priority: 'low'
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [loading, setLoading] = useState(true)
+
+  // Load notifications
+  const loadNotifications = () => {
+    setLoading(true)
+    const currentUser = database.getCurrentUser()
+    if (currentUser) {
+      const userNotifications = database.getUserNotifications(currentUser.id)
+      setNotifications(userNotifications)
     }
-  ])
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    loadNotifications()
+  }, [])
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
@@ -122,39 +49,58 @@ export default function NotificationsPage() {
   const getTimeAgo = (time: string) => {
     const now = new Date()
     const notificationTime = new Date(time)
-    const diffInHours = Math.floor((now.getTime() - notificationTime.getTime()) / (1000 * 60 * 60))
+    const diffInMinutes = Math.floor((now.getTime() - notificationTime.getTime()) / (1000 * 60))
     
-    if (diffInHours < 1) {
+    if (diffInMinutes < 1) {
       return 'الآن'
-    } else if (diffInHours < 24) {
+    } else if (diffInMinutes < 60) {
+      return `منذ ${diffInMinutes} دقيقة`
+    } else if (diffInMinutes < 1440) { // 24 hours
+      const diffInHours = Math.floor(diffInMinutes / 60)
       return `منذ ${diffInHours} ساعة`
     } else {
-      const diffInDays = Math.floor(diffInHours / 24)
+      const diffInDays = Math.floor(diffInMinutes / 1440)
       return `منذ ${diffInDays} يوم`
     }
   }
 
   const markAsRead = (id: string) => {
-    setNotifications(prev =>
-      prev.map(notif =>
-        notif.id === id ? { ...notif, isRead: true } : notif
-      )
-    )
+    const success = database.markNotificationAsRead(id)
+    if (success) {
+      loadNotifications()
+    }
   }
 
   const markAllAsRead = () => {
-    setNotifications(prev =>
-      prev.map(notif => ({ ...notif, isRead: true }))
-    )
+    const currentUser = database.getCurrentUser()
+    if (currentUser) {
+      notifications.forEach(notif => {
+        if (!notif.isRead) {
+          database.markNotificationAsRead(notif.id)
+        }
+      })
+      loadNotifications()
+    }
   }
 
   const deleteNotification = (id: string) => {
-    setNotifications(prev => prev.filter(notif => notif.id !== id))
+    if (confirm('هل أنت متأكد من حذف هذا الإشعار؟')) {
+      const success = database.deleteNotification(id)
+      if (success) {
+        loadNotifications()
+      }
+    }
   }
 
   const clearAllNotifications = () => {
     if (confirm('هل أنت متأكد من حذف جميع الإشعارات؟')) {
-      setNotifications([])
+      const currentUser = database.getCurrentUser()
+      if (currentUser) {
+        notifications.forEach(notif => {
+          database.deleteNotification(notif.id)
+        })
+        loadNotifications()
+      }
     }
   }
 
@@ -167,6 +113,42 @@ export default function NotificationsPage() {
 
   const unreadCount = notifications.filter(n => !n.isRead).length
   const highPriorityCount = notifications.filter(n => n.priority === 'high' && !n.isRead).length
+
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'task': return 'المهام'
+      case 'project': return 'المشاريع'
+      case 'team': return 'الفريق'
+      case 'system': return 'النظام'
+      case 'deadline': return 'المواعيد'
+      default: return type
+    }
+  }
+
+  const handleNotificationClick = (notification: Notification) => {
+    // Mark as read when clicked
+    if (!notification.isRead) {
+      markAsRead(notification.id)
+    }
+    
+    // Navigate to action URL if available
+    if (notification.actionUrl) {
+      window.location.href = notification.actionUrl
+    }
+  }
+
+  if (loading) {
+    return (
+      <AppLayout title="الإشعارات" description="تحميل الإشعارات...">
+        <div className="flex items-center justify-center min-h-96">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+            <p className="text-secondary-600">جاري تحميل الإشعارات...</p>
+          </div>
+        </div>
+      </AppLayout>
+    )
+  }
 
   return (
     <AppLayout 
@@ -196,10 +178,12 @@ export default function NotificationsPage() {
               </Button>
             )}
             
-            <Button onClick={clearAllNotifications} variant="ghost" size="sm">
-              <Trash2 className="w-4 h-4 ml-1" />
-              مسح الكل
-            </Button>
+            {notifications.length > 0 && (
+              <Button onClick={clearAllNotifications} variant="ghost" size="sm">
+                <Trash2 className="w-4 h-4 ml-1" />
+                مسح الكل
+              </Button>
+            )}
           </div>
         </div>
 
@@ -285,39 +269,26 @@ export default function NotificationsPage() {
             >
               عاجل ({notifications.filter(n => n.priority === 'high').length})
             </button>
-            
-            <button
-              onClick={() => setFilter('task')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                filter === 'task'
-                  ? 'bg-green-500 text-white'
-                  : 'bg-green-100 text-green-600 hover:bg-green-200'
-              }`}
-            >
-              المهام ({notifications.filter(n => n.type === 'task').length})
-            </button>
-            
-            <button
-              onClick={() => setFilter('project')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                filter === 'project'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
-              }`}
-            >
-              المشاريع ({notifications.filter(n => n.type === 'project').length})
-            </button>
-            
-            <button
-              onClick={() => setFilter('team')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                filter === 'team'
-                  ? 'bg-purple-500 text-white'
-                  : 'bg-purple-100 text-purple-600 hover:bg-purple-200'
-              }`}
-            >
-              الفريق ({notifications.filter(n => n.type === 'team').length})
-            </button>
+
+            {/* Type filters */}
+            {['task', 'project', 'team', 'system', 'deadline'].map(type => {
+              const typeNotifications = notifications.filter(n => n.type === type)
+              if (typeNotifications.length === 0) return null
+
+              return (
+                <button
+                  key={type}
+                  onClick={() => setFilter(type)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    filter === type
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
+                  }`}
+                >
+                  {getTypeLabel(type)} ({typeNotifications.length})
+                </button>
+              )
+            })}
           </div>
         </div>
 
@@ -330,7 +301,7 @@ export default function NotificationsPage() {
               <p className="text-secondary-600">
                 {filter === 'all' 
                   ? 'لم يتم العثور على أي إشعارات'
-                  : `لا توجد إشعارات في فئة "${filter}"`
+                  : `لا توجد إشعارات في فئة "${getTypeLabel(filter)}"`
                 }
               </p>
             </div>
@@ -338,9 +309,10 @@ export default function NotificationsPage() {
             filteredNotifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`bg-white rounded-xl border-l-4 shadow-sm border border-secondary-200 p-6 transition-all hover:shadow-md ${
+                className={`bg-white rounded-xl border-l-4 shadow-sm border border-secondary-200 p-6 transition-all hover:shadow-md cursor-pointer ${
                   getPriorityColor(notification.priority)
                 } ${!notification.isRead ? 'ring-2 ring-blue-100' : ''}`}
+                onClick={() => handleNotificationClick(notification)}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-4 space-x-reverse flex-1">
@@ -370,17 +342,14 @@ export default function NotificationsPage() {
                       
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-secondary-500">
-                          {getTimeAgo(notification.time)}
+                          {getTimeAgo(notification.createdAt)}
                         </span>
                         
                         <div className="flex items-center space-x-2 space-x-reverse">
                           {notification.actionUrl && (
-                            <button
-                              onClick={() => window.location.href = notification.actionUrl!}
-                              className="text-sm text-primary-600 hover:text-primary-700 font-medium"
-                            >
-                              عرض التفاصيل
-                            </button>
+                            <span className="text-sm text-primary-600 font-medium">
+                              انقر للعرض
+                            </span>
                           )}
                         </div>
                       </div>
@@ -390,7 +359,10 @@ export default function NotificationsPage() {
                   <div className="flex items-center space-x-2 space-x-reverse">
                     {!notification.isRead && (
                       <button
-                        onClick={() => markAsRead(notification.id)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          markAsRead(notification.id)
+                        }}
                         className="p-2 text-secondary-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                         title="تحديد كمقروء"
                       >
@@ -399,7 +371,10 @@ export default function NotificationsPage() {
                     )}
                     
                     <button
-                      onClick={() => deleteNotification(notification.id)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        deleteNotification(notification.id)
+                      }}
                       className="p-2 text-secondary-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                       title="حذف الإشعار"
                     >
@@ -412,12 +387,22 @@ export default function NotificationsPage() {
           )}
         </div>
 
-        {/* Load More */}
-        {filteredNotifications.length > 0 && (
-          <div className="text-center mt-8">
-            <Button variant="outline" onClick={() => alert('تحميل المزيد من الإشعارات')}>
-              تحميل المزيد
-            </Button>
+        {/* Empty state with action */}
+        {notifications.length === 0 && (
+          <div className="text-center py-12">
+            <Bell className="w-16 h-16 text-secondary-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-secondary-900 mb-2">لا توجد إشعارات حتى الآن</h3>
+            <p className="text-secondary-600 mb-4">
+              عندما تتم إضافة مهام أو مشاريع جديدة، ستظهر الإشعارات هنا
+            </p>
+            <div className="flex items-center justify-center space-x-4 space-x-reverse">
+              <Button onClick={() => window.location.href = '/projects'} variant="outline">
+                إنشاء مشروع
+              </Button>
+              <Button onClick={() => window.location.href = '/tasks'} variant="outline">
+                إنشاء مهمة
+              </Button>
+            </div>
           </div>
         )}
       </div>
