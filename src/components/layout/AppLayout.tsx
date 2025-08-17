@@ -109,7 +109,7 @@ export default function AppLayout({ children, title, description }: AppLayoutPro
       <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
       
       {/* Main Content */}
-      <div className="flex-1 lg:mr-72 flex flex-col">
+      <div className="flex-1 lg:mr-80 flex flex-col">
         {/* Top Header */}
         <header className="bg-white shadow-sm border-b border-secondary-200 sticky top-0 z-30">
           <div className="px-4 lg:px-8 py-4">

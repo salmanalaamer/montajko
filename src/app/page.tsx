@@ -61,10 +61,10 @@ export default function HomePage() {
       title="لوحة التحكم"
       description="نظرة عامة على مشاريعك وفريقك"
     >
-      <div className="p-6 lg:p-8">
+      <div className="p-4 lg:p-6">
         {/* Welcome Section */}
-        <div className="mb-8">
-          <div className="bg-gradient-to-l from-primary-500 to-primary-600 rounded-2xl p-8 text-white mb-6">
+        <div className="mb-6">
+          <div className="bg-gradient-to-l from-primary-500 to-primary-600 rounded-2xl p-6 lg:p-8 text-white mb-6">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl lg:text-3xl font-bold mb-2">
@@ -92,7 +92,7 @@ export default function HomePage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6 mb-6">
           {stats.map((stat, index) => (
             <div key={index} className="card hover:shadow-md transition-shadow animate-fade-in">
               <div className="flex items-center justify-between">
@@ -108,10 +108,12 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* Quick Actions */}
-        <div className="mb-8">
-          <h3 className="text-xl font-semibold text-secondary-900 mb-4">إجراءات سريعة</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          {/* Quick Actions */}
+          <div className="lg:col-span-1">
+            <h3 className="text-lg font-semibold text-secondary-900 mb-4">إجراءات سريعة</h3>
+            <div className="grid grid-cols-2 lg:grid-cols-1 gap-3">
             {quickActions.map((action, index) => (
               <button
                 key={index}
@@ -125,23 +127,23 @@ export default function HomePage() {
                     window.dispatchEvent(new CustomEvent('quickAction:upload'))
                   }
                 }}
-                className="card hover:shadow-md transition-all hover:scale-105 text-right group"
+                className="card hover:shadow-md transition-all hover:scale-[1.02] text-right group h-full"
               >
-                <div className="flex items-center justify-between mb-3">
-                  <action.icon className="w-8 h-8 text-primary-500 group-hover:text-primary-600 transition-colors" />
-                  <ChevronRight className="w-5 h-5 text-secondary-400 group-hover:text-primary-500 transition-colors" />
+                <div className="flex items-center justify-between mb-2">
+                  <action.icon className="w-6 h-6 text-primary-500 group-hover:text-primary-600 transition-colors" />
+                  <ChevronRight className="w-4 h-4 text-secondary-400 group-hover:text-primary-500 transition-colors" />
                 </div>
-                <h4 className="font-semibold text-secondary-900 mb-1">{action.title}</h4>
-                <p className="text-sm text-secondary-600">{action.description}</p>
+                <h4 className="font-semibold text-secondary-900 mb-1 text-sm">{action.title}</h4>
+                <p className="text-xs text-secondary-600">{action.description}</p>
               </button>
             ))}
+            </div>
           </div>
-        </div>
 
-        {/* Recent Projects */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-semibold text-secondary-900">المشاريع الأخيرة</h3>
+          {/* Recent Projects */}
+          <div className="lg:col-span-2">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-secondary-900">المشاريع الأخيرة</h3>
             <button 
               onClick={() => navigateTo('/projects')}
               className="text-primary-500 hover:text-primary-600 font-medium flex items-center"
@@ -190,9 +192,9 @@ export default function HomePage() {
         </div>
 
         {/* Performance Metrics */}
-        <div className="mb-8">
-          <h3 className="text-xl font-semibold text-secondary-900 mb-4">مؤشرات الأداء</h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-secondary-900 mb-4">مؤشرات الأداء</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
               <div className="flex items-center justify-between mb-4">
                 <TrendingUp className="w-8 h-8" />
