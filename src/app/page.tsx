@@ -144,13 +144,13 @@ export default function HomePage() {
           <div className="lg:col-span-2">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-secondary-900">المشاريع الأخيرة</h3>
-            <button 
-              onClick={() => navigateTo('/projects')}
-              className="text-primary-500 hover:text-primary-600 font-medium flex items-center"
-            >
-              عرض الكل <ChevronRight className="w-4 h-4 mr-1" />
-            </button>
-          </div>
+              <button 
+                onClick={() => navigateTo('/projects')}
+                className="text-primary-500 hover:text-primary-600 font-medium flex items-center"
+              >
+                عرض الكل <ChevronRight className="w-4 h-4 mr-1" />
+              </button>
+            </div>
           
           <div className="card">
             <div className="space-y-4">
@@ -188,6 +188,7 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
+          </div>
           </div>
         </div>
 
