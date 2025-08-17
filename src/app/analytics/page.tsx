@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { BarChart3, TrendingUp, TrendingDown, Users, Target, Calendar, Clock, Award, Filter, Download } from 'lucide-react'
+import { BarChart3, TrendingUp, TrendingDown, Users, Target, Calendar, Clock, Award, Filter, Download, AlertCircle } from 'lucide-react'
 import AppLayout from '@/components/layout/AppLayout'
 import Button from '@/components/ui/Button'
 
