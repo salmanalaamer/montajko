@@ -107,12 +107,12 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
       {/* Sidebar */}
       <div className={`
         fixed top-0 right-0 h-full bg-gradient-to-b from-white to-blue-50/30 shadow-xl border-l border-blue-200/50 z-50
-        transform transition-transform duration-300 ease-in-out w-80 backdrop-blur-sm
+        transform transition-transform duration-300 ease-in-out w-80 backdrop-blur-sm flex flex-col
         ${isOpen ? 'translate-x-0' : 'translate-x-full'}
         lg:translate-x-0
       `}>
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-primary-200/30 bg-gradient-to-l from-primary-50/50 to-transparent">
+        <div className="flex items-center justify-between p-6 border-b border-primary-200/30 bg-gradient-to-l from-primary-50/50 to-transparent flex-shrink-0">
           <div className="flex items-center space-x-3 space-x-reverse">
             <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg">
               <Star className="w-6 h-6 text-white" />
@@ -131,7 +131,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
         </div>
 
         {/* Search */}
-        <div className="p-6 border-b border-primary-200/30">
+        <div className="p-6 border-b border-primary-200/30 flex-shrink-0">
           <div className="relative">
             <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary-400 w-5 h-5" />
             <input
@@ -143,7 +143,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
         </div>
 
         {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto h-[calc(100vh-280px)]">
+        <div className="flex-1 overflow-y-auto">
           {/* Main Navigation */}
           <div className="p-6">
             <div className="flex items-center justify-between mb-4">
@@ -200,7 +200,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-primary-200/30 bg-gradient-to-br from-primary-50/50 to-blue-50/30">
+        <div className="p-6 border-t border-primary-200/30 bg-gradient-to-br from-primary-50/50 to-blue-50/30 flex-shrink-0">
           <div className="flex items-center space-x-3 space-x-reverse mb-4">
             <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg">
               <span className="text-lg font-bold text-white">أ</span>
