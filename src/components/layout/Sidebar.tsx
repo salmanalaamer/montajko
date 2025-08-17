@@ -147,10 +147,9 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
       {/* Sidebar */}
       <div className={`
         fixed top-0 right-0 h-full bg-gradient-to-b from-white to-blue-50/30 shadow-xl border-l border-blue-200/50 z-50
-        transform transition-transform duration-300 ease-in-out
+        transform transition-transform duration-300 ease-in-out w-80 backdrop-blur-sm
         ${isOpen ? 'translate-x-0' : 'translate-x-full'}
-        lg:translate-x-0 lg:static lg:shadow-lg lg:border-l-2 lg:border-primary-200/30
-        w-80 lg:w-80 backdrop-blur-sm
+        lg:translate-x-0
       `}>
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-primary-200/30 bg-gradient-to-l from-primary-50/50 to-transparent">
